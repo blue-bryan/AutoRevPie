@@ -2,11 +2,10 @@
 # -*- coding: utf-8 -*-
 """
 -Created on Wed May  8 09:41:43 2019
--@package: AutomateRevPie
 -@author: bryan
 
--A modular library using Selenium WebDriver built to fully automate workflows
- for RevPie. 
+-A modular library using Selenium WebDriver built to fully automate
+ traffic monitoring and the bidding process for RevPie.
 """
 
 import os
@@ -815,9 +814,9 @@ def waiting(duration):
         checkBrowser()
 
 def switchToTab(tab):
-    ''' Will switch browser tabs by index. 
-        :Arg:
-            tab takes an int type corresponding to the browser tab index
+    ''' Will switch browser tabs by index. \n
+        : Arg :  (tab)
+        - takes an int type corresponding to the browser tab index
     '''
     try:
         waiting(1)
