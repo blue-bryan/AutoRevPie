@@ -84,7 +84,7 @@ try:
     while _loop:
         try:
             _loop = ARP.checkBrowser()
-            ARP.admin_login(ARP.getLoginInfo("-u"), ARP.getLoginInfo("-p"))
+            ARP.admin_login(ARP.getLoginInfo('-u'), ARP.getLoginInfo('-p'))
         except KeyboardInterrupt:
             print("\n")
             sys.exit(1)
