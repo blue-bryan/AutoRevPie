@@ -1,0 +1,39 @@
+Filename: /home/bryan/Desktop/Utilities/Python/RevPie/AutoRevPie/logs.txt
+
+
+ - - - Logs (2019-06-05 16:37.42) - - - 
+
+
+2019-06-05 16:50:39.921387 
+-------------------- 
+
+Error: unable to update rep count...
+local variable '_newBid' referenced before assignment
+Traceback (most recent call last):
+  File "AutoRevPie_v4.py", line 150, in <module>
+    AutoRP_obj.autoRevPie(RepCounter.repCount)
+  File "/home/bryan/Desktop/Utilities/Python/RevPie/AutoRevPie/AutomateRevPie/AutomateRevPie.py", line 346, in autoRevPie
+    , self.campaigns[self.currentCampaign][0])
+  File "/home/bryan/Desktop/Utilities/Python/RevPie/AutoRevPie/AutomateRevPie/AutomateRevPie.py", line 195, in watchCalls
+    BidAdjuster.changeBids(*Bids, _option='-l')
+  File "/home/bryan/Desktop/Utilities/Python/RevPie/AutoRevPie/AutomateRevPie/AutomateRevPie.py", line 510, in changeBids
+    self.makeChange(_textBox, _newBid, item)
+UnboundLocalError: local variable '_newBid' referenced before assignment
+
+2019-06-05 16:50:47.197515 
+-------------------- 
+
+Error: error while executing AutoRevPie, closing...
+
+local variable '_newBid' referenced before assignment
+Traceback (most recent call last):
+  File "AutoRevPie_v4.py", line 125, in <module>
+    AutoRP_obj.autoRevPie(RepCounter.repCount)
+  File "/home/bryan/Desktop/Utilities/Python/RevPie/AutoRevPie/AutomateRevPie/AutomateRevPie.py", line 346, in autoRevPie
+    , self.campaigns[self.currentCampaign][0])
+  File "/home/bryan/Desktop/Utilities/Python/RevPie/AutoRevPie/AutomateRevPie/AutomateRevPie.py", line 195, in watchCalls
+    BidAdjuster.changeBids(*Bids, _option='-l')
+  File "/home/bryan/Desktop/Utilities/Python/RevPie/AutoRevPie/AutomateRevPie/AutomateRevPie.py", line 510, in changeBids
+    self.makeChange(_textBox, _newBid, item)
+UnboundLocalError: local variable '_newBid' referenced before assignment
+
