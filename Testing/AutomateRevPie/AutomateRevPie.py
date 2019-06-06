@@ -142,10 +142,10 @@ class AutoRevPie:
     def switchCampaigns(self, campaignID_1, campaignName_1, campaignID_2, campaignName_2):
         ''' -
             * usage:\n 
-                AutoRevPie.switchCampaigns(AutoRevPie.campaigns[AutoRevPie.currentCampaign][1]
-                                         , AutoRevPie.campaigns[AutoRevPie.currentCampaign][0]
-                                         , AutoRevPie.campaigns[AutoRevPie.currentCampaign+1][1]
-                                         , AutoRevPie.campaigns[AutoRevPie.currentCampaign+1][0])
+                AutoRevPie.switchCampaigns(AutoRevPie.campaigns[AutoRevPie.currentCampaign-1][1]
+                                         , AutoRevPie.campaigns[AutoRevPie.currentCampaign-1][0]
+                                         , AutoRevPie.campaigns[AutoRevPie.currentCampaign][1]
+                                         , AutoRevPie.campaigns[AutoRevPie.currentCampaign][0])
         '''
         BidAdjuster = AutoRevPie.autoBidAdjust()
         ErrorHandler().switchToTab(self.bidsPageTab)
@@ -329,10 +329,10 @@ class AutoRevPie:
             if (datetime.datetime.now().time() > datetime.datetime.strptime("11:01", "%H:%M").time()
             and datetime.datetime.now().time() < datetime.datetime.strptime("11:02", "%H:%M").time()
             and datetime.datetime.today().weekday() < 5):
-                self.switchCampaigns(self.campaigns[self.currentCampaign][1]
-                                    , self.campaigns[self.currentCampaign][0]
-                                    , self.campaigns[self.currentCampaign+1][1]
-                                    , self.campaigns[self.currentCampaign+1][0])
+                self.switchCampaigns( self.campaigns[self.currentCampaign-1][1]
+                                    , self.campaigns[self.currentCampaign-1][0]
+                                    , self.campaigns[self.currentCampaign][1]
+                                    , self.campaigns[self.currentCampaign][0])
                 ErrorHandler().printToLog('\n\nSwitched to 11am campaign...\n'
                         , "", logsPath)
                 # wait until 11:02
@@ -356,10 +356,10 @@ class AutoRevPie:
             and datetime.datetime.now().time() < datetime.datetime.strptime("19:02", "%H:%M").time()
             and datetime.datetime.today().weekday() < 5):
                 ErrorHandler().switchToTab(self.bidsPageTab)
-                self.switchCampaigns(self.campaigns[self.currentCampaign][1]
-                                    , self.campaigns[self.currentCampaign][0]
-                                    , self.campaigns[self.currentCampaign+1][1]
-                                    , self.campaigns[self.currentCampaign+1][0])
+                self.switchCampaigns( self.campaigns[self.currentCampaign-1][1]
+                                    , self.campaigns[self.currentCampaign-1][0]
+                                    , self.campaigns[self.currentCampaign][1]
+                                    , self.campaigns[self.currentCampaign][0])
                 ErrorHandler().printToLog('\n\nSwitched to 7pm campaign...\n'
                         , "", logsPath)
                 # wait until 19:02
@@ -384,6 +384,7 @@ class AutoRevPie:
                     for i in range(60 * 60 * 12):
                         if i < (60 * 60 * 12):
                             ErrorHandler().waiting(1)
+        return(self.currentCampaign)
 
 # ******************************************************************
 

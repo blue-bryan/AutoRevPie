@@ -13,33 +13,25 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions
 from selenium.common.exceptions import TimeoutException
 
-import AutomateRevPie.AutomateRevPie as AutoRP
+import AutomateRevPie.AutomateRevPie as ARP
 import AutomateRevPie.config as Config
-
-def openLog():
-    ''' Will open (or create a file if none exists),
-        named 'logs.txt' in the working directory. '''
-
-    # open log file and print header to file
-    with open(Config.logs_path, 'w') as f:
-        print('Filename:', Config.logs_path, file=f)
-        print('\n - - - Logs (' + str(time.strftime("%Y-%m-%d %H:%M.%S")) + ')' + ' - - - ' + '\n\n', file=f)
 
 ###############################################################################
 # Program start...
 
-print("\n####################################################################\n")
+with open(Config.getfpath(__file__)+"/AutoRevPie.info", 'r') as f:
+    print(" . . . ", f.readline())
 print("\nloading . . . \n")
 
-# Open log file 'log.txt' for logging
+# Open log file 'logs.txt' for logging
 try:
-    openLog()
+    with open(ARP.ErrorHandler().getLogFile(), 'w') as f:
+        print('Filename:', ARP.ErrorHandler().getLogFile(), file=f)
+        print('\n - - - Logs (' + str(time.strftime("%Y-%m-%d %H:%M.%S")) + ')' + ' - - - ' + '\n\n', file=f)
+        _loop = False
 except KeyboardInterrupt:
     sys.exit(1)
-except Exception as err:
-    AutoRP.printToLog("\n\nopenLog: Error while loading '/log.txt', logs will not be recorded\n"
-                , err, Config.logs_path)
-    sys.exit(1)
+except Exception:pass
 
 ################################ CONFIG #######################################
 # CONFIG FILE SHOULD BE IN THE WORKING DIRECTORY
@@ -60,75 +52,75 @@ except KeyboardInterrupt:
     print("\n")
     sys.exit(1)
 except Exception as err:
-    AutoRP.printToLog("\n\nconfigParser: Error while reading config file 'config.txt', closing..."
-                , err, Config.logs_path)
+    ARP.ErrorHandler().printToLog("\n\nconfigParser: Error while reading config file 'config.txt', closing..."
+                , err, ARP.ErrorHandler().getLogFile())
     sys.exit(1)
 
 ############################# browser setup ###################################
 
-AutoRP_obj = AutoRP.AutoRevPie(admin, 0, 1)
+AutoRP_obj = ARP.AutoRevPie(admin, 0, 1)
 BidAdjuster = AutoRP_obj.autoBidAdjust()
 try:
     # load admin page
-    AutoRP.browser.execute_script("window.open('" + admin + "')")
+    ARP.browser.execute_script("window.open('" + admin + "')")
     # login to admin
-    AutoRP.waiting(1)
-    AutoRP.switchToTab(AutoRP_obj.bidsPageTab)
+    ARP.ErrorHandler().waiting(1)
+    ARP.ErrorHandler().switchToTab(AutoRP_obj.bidsPageTab)
     login = True
     while login:
         try:
-            login = AutoRP.checkBrowser()
-            AutoRP.admin_login(AutoRP.getLoginInfo("-u"), AutoRP.getLoginInfo("-p"))
+            login = ARP.ErrorHandler().checkBrowser()
+            ARP.admin_login(ARP.getLoginInfo("-u"), ARP.getLoginInfo("-p"))
         except KeyboardInterrupt:
             print("\n")
             sys.exit(1)
         except Exception as err:
-            AutoRP.printToLog("\nError: Incorrect Username/Password, try again\n"
-                        , err, Config.logs_path)
+            ARP.ErrorHandler().printToLog("\nError: Incorrect Username/Password, try again\n"
+                        , err, ARP.ErrorHandler().getLogFile())
             print("\n . . . \n")
         else:
             login = False
     # load page for bid adjustments
     AutoRP_obj.openBidAdjustments()
-    AutoRP.browser.execute_script("revPieBidAdjustments('390', 'RP101_8am_to_11am')")
+    ARP.browser.execute_script("revPieBidAdjustments('396', 'RP_102_11am to 7pm')")
 
-    AutoRP.waiting(3)
-    AutoRP.browser.execute_script("changeBidAdjustmentsDateFilter('all')")
-    AutoRP.waiting(10)
+    ARP.ErrorHandler().waiting(3)
+    ARP.browser.execute_script("changeBidAdjustmentsDateFilter('all')")
+    ARP.ErrorHandler().waiting(10)
     check = True
     while check:
-        if (str(AutoRP.browser.find_element_by_id(
+        if (str(ARP.browser.find_element_by_id(
                 'bidAdjustmentsDateFilter').get_attribute(
                         "value")) == "all"):
             check = False
         else:
-            AutoRP.checkBrowser()
+            ARP.ErrorHandler().checkBrowser()
     Bids = BidAdjuster.copyBids()
     sourceIDs = Bids[0]
-    WebDriverWait(AutoRP.browser, 15).until(
+    WebDriverWait(ARP.browser, 15).until(
             expected_conditions.presence_of_element_located(
                     (By.ID, 'bidAdjustmentsTable')))
     for index, item in enumerate(sourceIDs):
         _customBidID = r"customBid_" + str(item)
         print(_customBidID)
-        AutoRP.waiting(1)
+        ARP.ErrorHandler().waiting(1)
         try:
-            text_area = AutoRP.browser.find_element_by_id(_customBidID)
+            text_area = ARP.browser.find_element_by_id(_customBidID)
         except:pass
         else:
             if Bids[2][index] != "0.01" and item != "1332" and item !="1250" and item != "1252" and item != "580" and item != "518" and item != "536" and item != "383":
                 text_area.send_keys(Keys.CONTROL, 'a')
-                AutoRP.waiting(1)
+                ARP.ErrorHandler().waiting(1)
                 text_area.send_keys("0.01")
-                AutoRP.waiting(1)
-                AutoRP.browser.execute_script("makeCustomBidAdjustment('" + str(item) + "')")
+                ARP.ErrorHandler().waiting(1)
+                ARP.browser.execute_script("makeCustomBidAdjustment('" + str(item) + "')")
 except KeyboardInterrupt:
     print("\n")
     sys.exit(1)
 except Exception as err:
-    AutoRP.printToLog("\n\nError while loading tabs, closing...\n"
-                , err, Config.logs_path)
-    AutoRP.browser.quit()
+    ARP.ErrorHandler().printToLog("\n\nError while loading tabs, closing...\n"
+                , err, ARP.ErrorHandler().getLogFile())
+    ARP.browser.quit()
     sys.exit(1)
 
 

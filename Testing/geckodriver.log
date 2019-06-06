@@ -5899,3 +5899,62 @@ JavaScript error: https://admin.oneloanplace.com//Affiliates/RevPieCampaignPerfo
 Exiting due to channel error.
 Exiting due to channel error.
 Exiting due to channel error.
+1559836218653	mozrunner::runner	INFO	Running command: "/usr/bin/firefox" "-marionette" "--ignore-certificate-errors" "--test-type" "-foreground" "-no-remote" "-profile" "/tmp/rust_mozprofile.ZxWDojFZtjMJ"
+1559836219015	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: mozillaAddons
+1559836219016	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: resource://pdf.js/
+1559836219016	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: about:reader*
+1559836221413	Marionette	INFO	Listening on port 37479
+1559836222384	Marionette	WARN	TLS certificate errors will be ignored for this session
+JavaScript error: https://admin.oneloanplace.com/Scripts/jquery.ba-bbq.min.js, line 18: TypeError: f is undefined
+1559836245273	Marionette	WARN	TimedPromise timed out after 0 ms: stacktrace:
+bail@chrome://marionette/content/sync.js:223:64
+1559836245524	Marionette	WARN	TimedPromise timed out after 0 ms: stacktrace:
+bail@chrome://marionette/content/sync.js:223:64
+1559836245540	Marionette	WARN	TimedPromise timed out after 0 ms: stacktrace:
+bail@chrome://marionette/content/sync.js:223:64
+JavaScript error: https://admin.oneloanplace.com/Scripts/jquery.ba-bbq.min.js, line 18: TypeError: f is undefined
+JavaScript error: https://admin.oneloanplace.com//Affiliates/RevPieCampaignPerformance, line 8: ReferenceError: $ is not defined
+console.error: BroadcastService: 
+  receivedBroadcastMessage: handler for
+  remote-settings/monitor_changes
+  threw error:
+  Message: Error: Polling for changes failed: http://%(server)s/dummy/blocklist//buckets/monitor/collections/changes/records?_expected=%221559774912279%22 is not a valid URL..
+  Stack:
+    remoteSettingsFunction/remoteSettings.pollChanges@resource://services-settings/remote-settings.js:203:13
+
+JavaScript error: https://admin.oneloanplace.com/Affiliates/RevPieCampaignPerformance, line 8: ReferenceError: $ is not defined
+console.error: BroadcastService: 
+  receivedBroadcastMessage: handler for
+  remote-settings/monitor_changes
+  threw error:
+  Message: Error: Polling for changes failed: http://%(server)s/dummy/blocklist//buckets/monitor/collections/changes/records?_expected=%221559814857242%22 is not a valid URL..
+  Stack:
+    remoteSettingsFunction/remoteSettings.pollChanges@resource://services-settings/remote-settings.js:203:13
+
+Exiting due to channel error.
+Exiting due to channel error.
+Exiting due to channel error.
+1559848705865	mozrunner::runner	INFO	Running command: "/usr/bin/firefox" "-marionette" "--ignore-certificate-errors" "--test-type" "-foreground" "-no-remote" "-profile" "/tmp/rust_mozprofile.4JN0DXhOoly2"
+1559848706966	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: mozillaAddons
+1559848706967	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: resource://pdf.js/
+1559848706967	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: about:reader*
+1559848709972	Marionette	INFO	Listening on port 45481
+1559848710024	Marionette	WARN	TLS certificate errors will be ignored for this session
+JavaScript error: https://admin.oneloanplace.com/Scripts/jquery.ba-bbq.min.js, line 18: TypeError: f is undefined
+1559848751033	Marionette	WARN	TimedPromise timed out after 0 ms: stacktrace:
+bail@chrome://marionette/content/sync.js:223:64
+1559848751291	Marionette	WARN	TimedPromise timed out after 0 ms: stacktrace:
+bail@chrome://marionette/content/sync.js:223:64
+1559848751309	Marionette	WARN	TimedPromise timed out after 0 ms: stacktrace:
+bail@chrome://marionette/content/sync.js:223:64
+console.error: BroadcastService: 
+  receivedBroadcastMessage: handler for
+  remote-settings/monitor_changes
+  threw error:
+  Message: Error: Polling for changes failed: http://%(server)s/dummy/blocklist//buckets/monitor/collections/changes/records?_expected=%221559814857242%22 is not a valid URL..
+  Stack:
+    remoteSettingsFunction/remoteSettings.pollChanges@resource://services-settings/remote-settings.js:203:13
+
+[Parent 29241, Gecko_IOThread] WARNING: pipe error (70): Connection reset by peer: file /build/firefox-AGcKNI/firefox-67.0+linuxmint2+tessa/ipc/chromium/src/chrome/common/ipc_channel_posix.cc, line 357
+[Parent 29241, Gecko_IOThread] WARNING: pipe error (79): Connection reset by peer: file /build/firefox-AGcKNI/firefox-67.0+linuxmint2+tessa/ipc/chromium/src/chrome/common/ipc_channel_posix.cc, line 357
+1559849103900	Marionette	INFO	Stopped listening on port 45481
