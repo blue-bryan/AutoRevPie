@@ -12,8 +12,8 @@ import datetime
 import configparser
 
 import setup
-import AutomateRevPie.AutomateRevPie as ARP
 import AutomateRevPie.config as Config
+import AutomateRevPie.Automate_RevPie as ARP
 
 ###############################################################################
 # Program start...
