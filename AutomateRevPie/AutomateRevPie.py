@@ -34,7 +34,7 @@ class AutoRevPie:
     ''' Contains methods and functions
         to automatically monitor and adjust RevPie Campaigns.
         
-        methods:
+         methods:
     '''
     def __init__ (self, _adminURL, _wallboardTab, _bidsPageTab):
         self.admin = _adminURL
@@ -229,7 +229,7 @@ class AutoRevPie:
                 browser.execute_script("$.Dialog.close()")
                 printToLog('\n\nBids raised...\n'
                         , "", Config.logs_path)
-                _startTime = time.time()
+                self.startTime = time.time()
                 self.adjustBids = 0
 
     def getCalls(self):
