@@ -701,6 +701,8 @@ class AutoRevPie:
                 tableValues = self.getStatsTable()
                 return(tableValues)
 
+# ******************************************************************
+
 class ErrorHandler:
     ''' Handles exceptions and logging.
     '''
@@ -769,7 +771,7 @@ class ErrorHandler:
         else:
             return(True)
 
-# ---END OF CLASS DEF---
+# ---END OF CLASS DEFS---
 ###############################################################################
 # FUNCTION DEFS:
 
