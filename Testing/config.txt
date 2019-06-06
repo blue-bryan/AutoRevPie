@@ -1,0 +1,8 @@
+[website-urls]
+admin = https://admin.oneloanplace.com/
+wallboard = http://172.20.48.100:2279/queueWallboard/1
+queueDetails = http://172.20.48.100:2279/queueDetails/1/10
+
+[login-info]
+username = admin
+password = 34Rocket$
