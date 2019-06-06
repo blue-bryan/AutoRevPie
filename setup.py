@@ -1,7 +1,6 @@
-import os
 import AutomateRevPie.config as Config
 
 # Generate logs file path
-_fpath = Config.getfpath()
-with open((_fpath + "/config.ini"), 'w') as f:
-    print(os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__))) + "/logs.txt", file=f)
+_fpath = Config.getfpath(__file__)
+with open((Config.config_path + "/config.ini"), 'w') as f:
+    print(_fpath + "/logs.txt", file=f)

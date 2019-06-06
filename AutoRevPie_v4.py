@@ -6,12 +6,12 @@ Created on Wed May  8 09:41:43 2019
 @author: bryan
 """
 
-import os
 import sys
 import time
 import datetime
 import configparser
 
+import setup
 import AutomateRevPie.AutomateRevPie as ARP
 import AutomateRevPie.config as Config
 
@@ -47,8 +47,8 @@ except Exception as err:
 try:
     # open file
     configParser = configparser.RawConfigParser()
-    configParser.read_file(open(os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
-                            + "/config.txt"))
+    configParser.read_file(open(Config.getfpath(__file__))
+                            + "/config.txt")
     # save to variables
     admin = r"{}".format(configParser.get('website-urls', 'admin'))
     wallboard = r"{}".format(configParser.get('website-urls', 'wallboard'))

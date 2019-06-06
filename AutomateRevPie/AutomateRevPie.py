@@ -8,13 +8,11 @@
  traffic monitoring and the bidding process for RevPie.
 """
 
-import os
 import sys
 import time
 import datetime
 import lxml.html
 import traceback
-import configparser
 from getpass import getpass
 from bs4 import BeautifulSoup
 from selenium import webdriver
