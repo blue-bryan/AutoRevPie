@@ -132,8 +132,8 @@ while _loop:
                 ARP.ErrorHandler().waiting(1)
                 RepCounter.repCount = RepCounter.getRepsUpdate()
                 ARP.ErrorHandler().waiting(1)
-                print('\n', CampaignStats.getStatsUpdate(AutoRP_obj.currentCampaign
-                                                    , AutoRP_obj.campaigns[AutoRP_obj.currentCampaign][0]), '\n')
+                CampaignStats.getStatsUpdate(AutoRP_obj.currentCampaign
+                                            , AutoRP_obj.campaigns[AutoRP_obj.currentCampaign][0])
                 _wait = True
                 while _wait:
                     if datetime.datetime.now().minute == (_startTime + 1):
@@ -148,8 +148,8 @@ while _loop:
                 , err, ARP.ErrorHandler().getLogFile())
         else: # else just get revpieStats
             try:
-                print('\n', CampaignStats.getStatsUpdate(AutoRP_obj.currentCampaign
-                                                    , AutoRP_obj.campaigns[AutoRP_obj.currentCampaign][0]), '\n')
+                CampaignStats.getStatsUpdate(AutoRP_obj.currentCampaign
+                                            , AutoRP_obj.campaigns[AutoRP_obj.currentCampaign][0])
                 ARP.ErrorHandler().waiting(1)
                 _wait = True
                 while _wait:
