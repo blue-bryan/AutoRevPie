@@ -876,9 +876,9 @@ def queueDaddy_login(username, password):
 # ---END OF FUNC DEFS---
 ###############################################################################
 
-with open((Config.getfpath(__file__)+"/AutomateRevPie.info", 'r')) as f:
+with open(Config.getfpath(__file__)+"/AutomateRevPie.info", 'r') as f:
     print("\n####################################################################\n\n")
-    print(f.readline() + '\n')
+    print(" . . . ", f.readline())
 browser = start_browser()
 
 

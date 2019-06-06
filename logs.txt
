@@ -1,72 +1,21 @@
 Filename: /home/bryan/Desktop/Utilities/Python/RevPie/AutoRevPie/logs.txt
 
 
- - - - Logs (2019-06-06 03:16.11) - - - 
+ - - - Logs (2019-06-06 10:44.48) - - - 
 
 
-2019-06-06 03:16:18.099756 
--------------------- 
-Browser Error: failed to login to QueueDaddy, closing...
-Message: Failed to decode response from marionette
-
-Traceback (most recent call last):
-  File "/home/bryan/Desktop/Utilities/Python/RevPie/AutoRevPie/AutomateRevPie/AutomateRevPie.py", line 859, in queueDaddy_login
-    (By.XPATH, "//input[@name='userName']")))
-  File "/home/bryan/anaconda3/envs/environment_2/lib/python3.7/site-packages/selenium/webdriver/support/wait.py", line 71, in until
-    value = method(self._driver)
-  File "/home/bryan/anaconda3/envs/environment_2/lib/python3.7/site-packages/selenium/webdriver/support/expected_conditions.py", line 64, in __call__
-    return _find_element(driver, self.locator)
-  File "/home/bryan/anaconda3/envs/environment_2/lib/python3.7/site-packages/selenium/webdriver/support/expected_conditions.py", line 415, in _find_element
-    raise e
-  File "/home/bryan/anaconda3/envs/environment_2/lib/python3.7/site-packages/selenium/webdriver/support/expected_conditions.py", line 411, in _find_element
-    return driver.find_element(*by)
-  File "/home/bryan/anaconda3/envs/environment_2/lib/python3.7/site-packages/selenium/webdriver/remote/webdriver.py", line 978, in find_element
-    'value': value})['value']
-  File "/home/bryan/anaconda3/envs/environment_2/lib/python3.7/site-packages/selenium/webdriver/remote/webdriver.py", line 321, in execute
-    self.error_handler.check_response(response)
-  File "/home/bryan/anaconda3/envs/environment_2/lib/python3.7/site-packages/selenium/webdriver/remote/errorhandler.py", line 242, in check_response
-    raise exception_class(message, screen, stacktrace)
-selenium.common.exceptions.WebDriverException: Message: Failed to decode response from marionette
-
-
-2019-06-06 03:16:18.101359 
+2019-06-06 10:45:40.565678 
 -------------------- 
 
-checkBrowser: Error, closing...
+getRepsUpdate(): timeout exception
 
-Message: Tried to run command without establishing a connection
-
-Traceback (most recent call last):
-  File "/home/bryan/Desktop/Utilities/Python/RevPie/AutoRevPie/AutomateRevPie/AutomateRevPie.py", line 859, in queueDaddy_login
-    (By.XPATH, "//input[@name='userName']")))
-  File "/home/bryan/anaconda3/envs/environment_2/lib/python3.7/site-packages/selenium/webdriver/support/wait.py", line 71, in until
-    value = method(self._driver)
-  File "/home/bryan/anaconda3/envs/environment_2/lib/python3.7/site-packages/selenium/webdriver/support/expected_conditions.py", line 64, in __call__
-    return _find_element(driver, self.locator)
-  File "/home/bryan/anaconda3/envs/environment_2/lib/python3.7/site-packages/selenium/webdriver/support/expected_conditions.py", line 415, in _find_element
-    raise e
-  File "/home/bryan/anaconda3/envs/environment_2/lib/python3.7/site-packages/selenium/webdriver/support/expected_conditions.py", line 411, in _find_element
-    return driver.find_element(*by)
-  File "/home/bryan/anaconda3/envs/environment_2/lib/python3.7/site-packages/selenium/webdriver/remote/webdriver.py", line 978, in find_element
-    'value': value})['value']
-  File "/home/bryan/anaconda3/envs/environment_2/lib/python3.7/site-packages/selenium/webdriver/remote/webdriver.py", line 321, in execute
-    self.error_handler.check_response(response)
-  File "/home/bryan/anaconda3/envs/environment_2/lib/python3.7/site-packages/selenium/webdriver/remote/errorhandler.py", line 242, in check_response
-    raise exception_class(message, screen, stacktrace)
-selenium.common.exceptions.WebDriverException: Message: Failed to decode response from marionette
-
-
-During handling of the above exception, another exception occurred:
+Message: 
 
 Traceback (most recent call last):
-  File "/home/bryan/Desktop/Utilities/Python/RevPie/AutoRevPie/AutomateRevPie/AutomateRevPie.py", line 761, in checkBrowser
-    browser.title
-  File "/home/bryan/anaconda3/envs/environment_2/lib/python3.7/site-packages/selenium/webdriver/remote/webdriver.py", line 342, in title
-    resp = self.execute(Command.GET_TITLE)
-  File "/home/bryan/anaconda3/envs/environment_2/lib/python3.7/site-packages/selenium/webdriver/remote/webdriver.py", line 321, in execute
-    self.error_handler.check_response(response)
-  File "/home/bryan/anaconda3/envs/environment_2/lib/python3.7/site-packages/selenium/webdriver/remote/errorhandler.py", line 242, in check_response
-    raise exception_class(message, screen, stacktrace)
-selenium.common.exceptions.InvalidSessionIdException: Message: Tried to run command without establishing a connection
+  File "/home/bryan/Desktop/Utilities/Python/RevPie/AutoRevPie/AutomateRevPie/AutomateRevPie.py", line 695, in getStatsUpdate
+    expected_conditions.alert_is_present())
+  File "/home/bryan/anaconda3/envs/environment_2/lib/python3.7/site-packages/selenium/webdriver/support/wait.py", line 80, in until
+    raise TimeoutException(message, screen, stacktrace)
+selenium.common.exceptions.TimeoutException: Message: 
 
 

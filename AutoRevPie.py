@@ -18,9 +18,8 @@ import AutomateRevPie.config as Config
 ###############################################################################
 # Program start...
 
-with open((Config.getfpath(__file__)+"/AutoRevPie.info", 'r')) as f:
-    print(f.readline())
-    print("\n . . . \n")
+with open(Config.getfpath(__file__)+"/AutoRevPie.info", 'r') as f:
+    print(" . . . ", f.readline())
 print("\nloading . . . \n")
 
 # Open log file 'logs.txt' for logging
