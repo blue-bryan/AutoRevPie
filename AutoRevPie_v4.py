@@ -15,15 +15,6 @@ import setup
 import AutomateRevPie.AutomateRevPie as ARP
 import AutomateRevPie.config as Config
 
-def openLog():
-    ''' Will open (or create a file if none exists),
-        named 'logs.txt' in the working directory.
-    '''
-    # open log file and print header to file
-    with open(Config.logs_path, 'w') as f:
-        print('Filename:', Config.logs_path, file=f)
-        print('\n - - - Logs (' + str(time.strftime("%Y-%m-%d %H:%M.%S")) + ')' + ' - - - ' + '\n\n', file=f)
-
 ###############################################################################
 # Program start...
 
@@ -31,14 +22,18 @@ print("\n####################################################################\n"
 print("\nloading . . . \n")
 
 # Open log file 'logs.txt' for logging
-try:
-    openLog()
-except KeyboardInterrupt:
-    sys.exit(1)
-except Exception as err:
-    ARP.printToLog("\n\nopenLog: Error while loading '/logs.txt', logs will not be recorded\n"
-                , err, Config.logs_path)
-    sys.exit(1)
+_loop = True
+while _loop:
+    try:
+        with open ((Config.config_path+"/config.ini"), 'r') as f:
+                _logsPath=f.readline()
+        with open(_logsPath, 'w') as f:
+            print('Filename:', _logsPath, file=f)
+            print('\n - - - Logs (' + str(time.strftime("%Y-%m-%d %H:%M.%S")) + ')' + ' - - - ' + '\n\n', file=f)
+            _loop = False
+    except KeyboardInterrupt:
+        sys.exit(1)
+    except Exception:pass
 
 ################################ CONFIG #######################################
 # CONFIG FILE SHOULD BE IN THE WORKING DIRECTORY
@@ -47,8 +42,8 @@ except Exception as err:
 try:
     # open file
     configParser = configparser.RawConfigParser()
-    configParser.read_file(open(Config.getfpath(__file__))
-                            + "/config.txt")
+    configParser.read_file(open(Config.getfpath(__file__)
+                            + "/config.txt"))
     # save to variables
     admin = r"{}".format(configParser.get('website-urls', 'admin'))
     wallboard = r"{}".format(configParser.get('website-urls', 'wallboard'))
@@ -60,7 +55,7 @@ except KeyboardInterrupt:
     sys.exit(1)
 except Exception as err:
     ARP.printToLog("\n\nconfigParser: Error while reading config file 'config.txt', closing..."
-                , err, Config.logs_path)
+                , err, _logsPath)
     sys.exit(1)
 
 ############################# browser setup ###################################
@@ -90,7 +85,7 @@ try:
             sys.exit(1)
         except Exception as err:
             ARP.printToLog("\nError: Incorrect Username/Password, try again...\n"
-                        , err, Config.logs_path)
+                        , err, _logsPath)
             print("\n . . . \n")
         else:
             _loop = False
@@ -111,7 +106,7 @@ except KeyboardInterrupt:
     sys.exit(1)
 except Exception as err:
     ARP.printToLog("\n\nError while loading tabs, closing...\n"
-                , err, Config.logs_path)
+                , err, _logsPath)
     ARP.browser.quit()
     sys.exit(1)
 
@@ -128,7 +123,7 @@ while _loop:
         sys.exit(1)
     except Exception as err:
         ARP.printToLog("\n\nError: error while executing AutoRevPie, closing...\n"
-                    , err, Config.logs_path)
+                    , err, _logsPath)
         ARP.browser.quit()
         sys.exit(1)
     # update revpieStats on every 5th minute of the hour...
@@ -153,7 +148,7 @@ while _loop:
                 sys.exit(1)
             except Exception as err:
                 ARP.printToLog("\n\nError: unable to update rep count..."
-                , err, Config.logs_path)
+                , err, _logsPath)
         else: # else just get revpieStats
             try:
                 print('\n', CampaignStats.getStatsUpdate(AutoRP_obj.currentCampaign
@@ -170,6 +165,6 @@ while _loop:
                 sys.exit(1)
             except Exception as err:
                 ARP.printToLog("\n\nError: unable to update revpieStats..."
-                , err, Config.logs_path)
+                , err, _logsPath)
 
 
