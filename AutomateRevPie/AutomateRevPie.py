@@ -25,10 +25,7 @@ from selenium.common.exceptions import TimeoutException
 
 # get logs file path
 import AutomateRevPie.config as Config
-try:
-    with open ((Config.config_path+"/config.ini"), 'r') as f:
-            _logsPath=f.readline()
-except:pass
+logsPath = None
 
 #                       - AutomateRevPie Module -
 ###############################################################################
@@ -80,15 +77,15 @@ class AutoRevPie:
             accordionFrame = browser.find_element_by_xpath("//a[.='RevPie Reporting']")
             actions = ActionChains(browser)
             actions.move_to_element(accordionFrame).click().perform()
-            waiting(2)
+            ErrorHandler().waiting(2)
             browser.execute_script("$('#RevPieCampaigns').click()")
             wait.until(
                     expected_conditions.presence_of_element_located(
                             (By.ID, "revPieCampaignsDiv")))
         except Exception as err:
-            printToLog("\n\nBrowser Error: failed to open Bid Adjustments, closing...\n"
-                        , err, _logsPath)
-            checkBrowser()
+            ErrorHandler().printToLog("\n\nBrowser Error: failed to open Bid Adjustments, closing...\n"
+                        , err, logsPath)
+            ErrorHandler().checkBrowser()
 
     def getCampaignStatus(self):
         ''' Will iterate the RevPie Campaigns table and get
@@ -96,15 +93,15 @@ class AutoRevPie:
             then returns the array.
             * paused==True/active==False
         '''
-        switchToTab(self.bidsPageTab)
+        ErrorHandler().switchToTab(self.bidsPageTab)
         try:
             WebDriverWait(browser, 15).until(
                     expected_conditions.presence_of_element_located(
                             (By.ID, "revPieCampaignsDiv")))
         except Exception as err:
-            printToLog("\n\nBrowser Error while getting campaign status, closing...\n"
-                        , err, _logsPath)
-            checkBrowser()
+            ErrorHandler().printToLog("\n\nBrowser Error while getting campaign status, closing...\n"
+                        , err, logsPath)
+            ErrorHandler().checkBrowser()
             return(False)
         else:
             browser.execute_script("$('#RevPieCampaigns').click()")
@@ -113,8 +110,8 @@ class AutoRevPie:
                         expected_conditions.presence_of_element_located(
                                 (By.ID, "revPieCampaignsDiv")))
             except Exception as err:
-                printToLog("\n\ngetCampaignStatus: error, cannot find 'revPieCampaignsDiv'\n"
-                        , err, _logsPath)
+                ErrorHandler().printToLog("\n\ngetCampaignStatus: error, cannot find 'revPieCampaignsDiv'\n"
+                        , err, logsPath)
                 return(False)
             else:
                 # get the table
@@ -151,27 +148,27 @@ class AutoRevPie:
                                          , AutoRevPie.campaigns[AutoRevPie.currentCampaign+1][0])
         '''
         BidAdjuster = AutoRevPie.autoBidAdjust()
-        switchToTab(self.bidsPageTab)
+        ErrorHandler().switchToTab(self.bidsPageTab)
         #browser.execute_script("changeRevPieCampaignStatus(" + campaignID_1 + ", 1)")
-        waiting(1)
+        ErrorHandler().waiting(1)
         #browser.execute_script("changeRevPieCampaignStatus(" + campaignID_2 + ", 0)")
-        waiting(2)
+        ErrorHandler().waiting(2)
         browser.execute_script("revPieBidAdjustments("
                                 + campaignID_1 + ", '" + campaignName_1 + "')")
-        waiting(1)
+        ErrorHandler().waiting(1)
         WebDriverWait(browser, 15).until(
                 expected_conditions.presence_of_element_located(
                         (By.ID,'bidAdjustmentsTable')))
-        waiting(1)
+        ErrorHandler().waiting(1)
         Bids = BidAdjuster.copyBids()
-        waiting(1)
+        ErrorHandler().waiting(1)
         browser.execute_script("$.Dialog.close()")
-        waiting(2)
+        ErrorHandler().waiting(2)
         browser.execute_script("revPieBidAdjustments("
                                 + campaignID_2 + ", '" + campaignName_2 + "')")
-        waiting(5)
+        ErrorHandler().waiting(5)
         BidAdjuster.changeBids(*Bids, _option='-p')
-        waiting(1)
+        ErrorHandler().waiting(1)
         browser.execute_script("$.Dialog.close()")
 
     def watchCalls(self, campaignID, campaignName):
@@ -187,58 +184,58 @@ class AutoRevPie:
             self.isPaused = False
         if self.totalCalls > self.adjustBids_CallLimit and not self.isPaused and self.adjustBids == 0:
             if not self.isPaused:
-                switchToTab(self.bidsPageTab)
-                waiting(1)
+                ErrorHandler().switchToTab(self.bidsPageTab)
+                ErrorHandler().waiting(1)
                 browser.execute_script("revPieBidAdjustments("
                                         + campaignID + ", '" + campaignName + "')")
-                waiting(2)
+                ErrorHandler().waiting(2)
                 Bids = BidAdjuster.copyBids()
-                waiting(1)
+                ErrorHandler().waiting(1)
                 BidAdjuster.changeBids(*Bids, _option='-l')
-                waiting(1)
+                ErrorHandler().waiting(1)
                 browser.execute_script("$.Dialog.close()")
-                printToLog('\n\nBids lowered...\n'
-                        , "", _logsPath)
+                ErrorHandler().printToLog('\n\nBids lowered...\n'
+                        , "", logsPath)
                 self.startTime = time.time()
                 self.adjustBids = 1
                 self.campaigns = self.getCampaignStatus()
         elif self.totalCalls > self.maxCallLimit and not self.isPaused:
             self.campaigns = self.getCampaignStatus()
             if not self.isPaused:
-                switchToTab(self.bidsPageTab)
+                ErrorHandler().switchToTab(self.bidsPageTab)
                 browser.execute_script("changeRevPieCampaignStatus(" + campaignID + ", 1)")
-                printToLog('\n\nCampaign Paused...\n'
-                        , "", _logsPath)
+                ErrorHandler().printToLog('\n\nCampaign Paused...\n'
+                        , "", logsPath)
                 self.campaigns = self.getCampaignStatus()
         elif self.totalCalls < 3 and self.isPaused:
             self.campaigns = self.getCampaignStatus()
             if self.isPaused:
-                switchToTab(self.bidsPageTab)
+                ErrorHandler().switchToTab(self.bidsPageTab)
                 browser.execute_script("changeRevPieCampaignStatus(" + campaignID + ", 0)")
-                printToLog('\n\nCampaign un-paused...\n'
-                        , "", _logsPath)
+                ErrorHandler().printToLog('\n\nCampaign un-paused...\n'
+                        , "", logsPath)
                 self.campaigns = self.getCampaignStatus()
         elif self.totalCalls < 3 and not self.isPaused and self.adjustBids == 1 :
             _timeDiff = time.time() - self.startTime
             if _timeDiff > (5 * 60):
-                switchToTab(self.bidsPageTab)
+                ErrorHandler().switchToTab(self.bidsPageTab)
                 browser.execute_script("revPieBidAdjustments("
                                         + campaignID + ", '" + campaignName + "')")
-                waiting(1)
+                ErrorHandler().waiting(1)
                 Bids = BidAdjuster.copyBids()
-                waiting(1)
+                ErrorHandler().waiting(1)
                 BidAdjuster.changeBids(*Bids)
-                waiting(1)
+                ErrorHandler().waiting(1)
                 browser.execute_script("$.Dialog.close()")
-                printToLog('\n\nBids raised...\n'
-                        , "", _logsPath)
+                ErrorHandler().printToLog('\n\nBids raised...\n'
+                        , "", logsPath)
                 self.startTime = time.time()
                 self.adjustBids = 0
 
     def getCalls(self):
         ''' Count calls in queue
         '''
-        switchToTab(self.wallboardTab)
+        ErrorHandler().switchToTab(self.wallboardTab)
         try: # switch to wall board for total calls
             WebDriverWait(browser, 15).until(
                     expected_conditions.presence_of_element_located(
@@ -252,10 +249,10 @@ class AutoRevPie:
                             + int(seniorLoan2.text))
             return(self.totalCalls)
         except Exception as err:
-            printToLog("\n\nBrowser error: wallboard\n"
-                        , err, _logsPath)
+            ErrorHandler().printToLog("\n\nBrowser error: wallboard\n"
+                        , err, logsPath)
             self.totalCalls = 0
-            checkBrowser()
+            ErrorHandler().checkBrowser()
             return(self.totalCalls)
 
     def autoRevPie(self, repsAvail):
@@ -264,15 +261,15 @@ class AutoRevPie:
             Then automatically makes adjustments based on criteria.
             * Must be executed in a loop to run continuously
         '''
-        checkBrowser()
+        ErrorHandler().checkBrowser()
         # check if repsAvail == None, this will avoid NaN error for callLimit
         if repsAvail is None and self.getReps:
-            printToLog("\nError: failed to get rep count, using default callLimit=8...\n\n"
-                    , "", _logsPath)
+            ErrorHandler().printToLog("\nError: failed to get rep count, using default callLimit=8...\n\n"
+                    , "", logsPath)
             self.getReps = False
         elif repsAvail is 0 and self.getReps:
-            printToLog("\nError: failed to get rep count, using default callLimit=8...\n\n"
-                    , "", _logsPath)
+            ErrorHandler().printToLog("\nError: failed to get rep count, using default callLimit=8...\n\n"
+                    , "", logsPath)
             self.getReps = False
         elif repsAvail is not None and self.getReps:
             self.adjustBids_CallLimit = round((repsAvail * self.repsToCallsRatio), 0)
@@ -291,8 +288,8 @@ class AutoRevPie:
                   , '  Total Calls: ', self.totalCalls, ' '
                   , end="", flush = True)
         except Exception as err:
-            printToLog("\n\nautoPause: Error while printing output\n"
-                        , err, _logsPath)
+            ErrorHandler().printToLog("\n\nautoPause: Error while printing output\n"
+                        , err, logsPath)
             sys.exit(1)
 
         # 8am - 11am
@@ -308,16 +305,16 @@ class AutoRevPie:
             and datetime.datetime.now().time() < datetime.datetime.strptime("09:01", "%H:%M").time()
             and datetime.datetime.today().weekday() < 5):
                 if self.isPaused:
-                    switchToTab(self.bidsPageTab)
+                    ErrorHandler().switchToTab(self.bidsPageTab)
                     browser.execute_script("changeRevPieCampaignStatus(" + self.campaigns[self.currentCampaign][1] + ", 0)")
-                    printToLog('\n\n9am-11am Campaign started\n'
-                            , "", _logsPath)
+                    ErrorHandler().printToLog('\n\n9am-11am Campaign started\n'
+                            , "", logsPath)
                     self.campaigns = self.getCampaignStatus()
                     for i in range(60 * 2):
                         if i < (60 * 2):
                             self.watchCalls(self.campaigns[self.currentCampaign][1]
                                             , self.campaigns[self.currentCampaign][0])
-                            waiting(1)
+                            ErrorHandler().waiting(1)
             self.watchCalls(self.campaigns[self.currentCampaign][1]
                             , self.campaigns[self.currentCampaign][0])
         # 11am - 7pm
@@ -336,14 +333,14 @@ class AutoRevPie:
                                     , self.campaigns[self.currentCampaign][0]
                                     , self.campaigns[self.currentCampaign+1][1]
                                     , self.campaigns[self.currentCampaign+1][0])
-                printToLog('\n\nSwitched to 11am campaign...\n'
-                        , "", _logsPath)
+                ErrorHandler().printToLog('\n\nSwitched to 11am campaign...\n'
+                        , "", logsPath)
                 # wait until 11:02
                 for i in range(60):
                     if i < (60):
                         self.watchCalls(self.campaigns[self.currentCampaign][1]
                                         , self.campaigns[self.currentCampaign][0])
-                        waiting(1)
+                        ErrorHandler().waiting(1)
             self.watchCalls(self.campaigns[self.currentCampaign][1]
                             , self.campaigns[self.currentCampaign][0])
         # 7pm - close
@@ -358,35 +355,35 @@ class AutoRevPie:
             if (datetime.datetime.now().time() > datetime.datetime.strptime("19:01", "%H:%M").time()
             and datetime.datetime.now().time() < datetime.datetime.strptime("19:02", "%H:%M").time()
             and datetime.datetime.today().weekday() < 5):
-                switchToTab(self.bidsPageTab)
+                ErrorHandler().switchToTab(self.bidsPageTab)
                 self.switchCampaigns(self.campaigns[self.currentCampaign][1]
                                     , self.campaigns[self.currentCampaign][0]
                                     , self.campaigns[self.currentCampaign+1][1]
                                     , self.campaigns[self.currentCampaign+1][0])
-                printToLog('\n\nSwitched to 7pm campaign...\n'
-                        , "", _logsPath)
+                ErrorHandler().printToLog('\n\nSwitched to 7pm campaign...\n'
+                        , "", logsPath)
                 # wait until 19:02
                 for i in range(60):
                     if i < (60):
                         self.watchCalls(self.campaigns[self.currentCampaign][1]
                                         , self.campaigns[self.currentCampaign][0])
-                        waiting(1)
+                        ErrorHandler().waiting(1)
             elif (datetime.datetime.now().time() > datetime.datetime.strptime("20:55", "%H:%M").time()
             and datetime.datetime.now().time() < datetime.datetime.strptime("21:01", "%H:%M").time()
             and datetime.datetime.today().weekday() < 5):
                 browser.execute_script("changeRevPieCampaignStatus(" + self.campaigns[self.currentCampaign][1] + ", 1)")
                 self.campaigns = self.getCampaignStatus()
-                printToLog('\n\n7pm-close Campaign Paused...\n'
-                        , "", _logsPath)
+                ErrorHandler().printToLog('\n\n7pm-close Campaign Paused...\n'
+                        , "", logsPath)
                 # wait until next day
                 if datetime.datetime.today().weekday() == 4:
                     for i in range(60 * 60 * 24 * 2.5):
                         if i < (60 * 60 * 24 * 2.5):
-                            waiting(1)
+                            ErrorHandler().waiting(1)
                 elif datetime.datetime.today().weekday() < 5:
                     for i in range(60 * 60 * 12):
                         if i < (60 * 60 * 12):
-                            waiting(1)
+                            ErrorHandler().waiting(1)
 
 # ******************************************************************
 
@@ -423,7 +420,7 @@ class AutoRevPie:
                 * Returns a tuple of lists: [ self.sourceIDs[0], self.clicksPerMin, self.customBids) ]
             '''
             # wait for the table
-            waiting(1)
+            ErrorHandler().waiting(1)
             WebDriverWait(browser, 15).until(
                     expected_conditions.presence_of_element_located(
                             (By.ID,'bidAdjustmentsTable')))
@@ -460,7 +457,7 @@ class AutoRevPie:
             '''
             __textBox.send_keys(Keys.CONTROL, 'a')
             __textBox.send_keys(str(__newBid))
-            waiting(1)
+            ErrorHandler().waiting(1)
             browser.execute_script("makeCustomBidAdjustment('" + str(_item) + "')")
 
         def changeBids(self, sourceIDs, clicksPerMin, customBids, _option = None, changeAmount = 0.04, minCPM = 0):
@@ -482,7 +479,7 @@ class AutoRevPie:
             '''
             if _option == '-p': # change date filter to All if pasting bids
                 browser.execute_script("changeBidAdjustmentsDateFilter('all')")
-                waiting(1)
+                ErrorHandler().waiting(1)
                 _loop = True
                 while _loop:
                     if (str(browser.find_element_by_id(
@@ -490,8 +487,8 @@ class AutoRevPie:
                                     "value")) == "all"):
                         _loop = False
                     else:
-                        checkBrowser()
-                waiting(1)
+                        ErrorHandler().checkBrowser()
+                ErrorHandler().waiting(1)
                 WebDriverWait(browser, 15).until(
                         expected_conditions.presence_of_element_located(
                                 (By.ID, 'bidAdjustmentsTable')))
@@ -532,19 +529,19 @@ class AutoRevPie:
             '''
             try:
                 browser.execute_script("window.location = '/Maintenance/QueueOrder'")
-                waiting(1)
+                ErrorHandler().waiting(1)
                 WebDriverWait(browser, 10).until(
                         expected_conditions.presence_of_element_located(
                                 (By.XPATH, "//select[@name='queueNumber']/option[text()='Rollover']")))
                 browser.find_element_by_xpath(
                         "//select[@name='queueNumber']/option[text()='Rollover']").click()
                 browser.find_element_by_name('QueueList').click()
-                waiting(1)
+                ErrorHandler().waiting(1)
                 self.repCount = self.getRepsTable()
                 return(self.repCount)
             except Exception as err:
-                printToLog("\nBrowser error, failed to get queue order\n"
-                        , err, _logsPath)
+                ErrorHandler().printToLog("\nBrowser error, failed to get queue order\n"
+                        , err, logsPath)
                 return(None)
 
         def getRepsTable(self):
@@ -564,9 +561,9 @@ class AutoRevPie:
                 self.repCount = list(map(int, repTable))
                 return(int(self.repCount[0]))
             except Exception as err:
-                printToLog("\n\nError: failed to get reps in queue\n"
-                        , err, _logsPath)
-                waiting(1)
+                ErrorHandler().printToLog("\n\nError: failed to get reps in queue\n"
+                        , err, logsPath)
+                ErrorHandler().waiting(1)
                 return(None)
 
         def getRepsUpdate(self):
@@ -576,18 +573,18 @@ class AutoRevPie:
             '''
             try:
                 # switch to tab for queue order
-                switchToTab(self.queueOrderTab)
-                waiting(1)
+                ErrorHandler().switchToTab(self.queueOrderTab)
+                ErrorHandler().waiting(1)
                 browser.refresh()
-                waiting(1)
+                ErrorHandler().waiting(1)
                 WebDriverWait(browser, 5).until(
                         expected_conditions.alert_is_present())
                 alert = browser.switch_to.alert
                 alert.accept() # accept form resubmit
             except TimeoutException as err:
-                printToLog("getRepsUpdate(): timeout exception"
-                        , err, _logsPath)
-            waiting(1)
+                ErrorHandler().printToLog("getRepsUpdate(): timeout exception"
+                        , err, logsPath)
+            ErrorHandler().waiting(1)
             self.repCount = self.getRepsTable()
             return(self.repCount)
 
@@ -611,9 +608,9 @@ class AutoRevPie:
             ''' Will load Campaign Performance Report for the current campaign
             '''
             try:
-                switchToTab(self.revpieStatsTab)
+                ErrorHandler().switchToTab(self.revpieStatsTab)
                 browser.execute_script("window.location = '/Affiliates/RevPieCampaignPerformance'")
-                waiting(1)
+                ErrorHandler().waiting(1)
                 WebDriverWait(browser, 60).until(
                         expected_conditions.presence_of_element_located(
                                 (By.NAME, "CampaignId")))
@@ -632,8 +629,8 @@ class AutoRevPie:
                 print("\n", err)
                 sys.exit(1)
             except Exception as err:
-                printToLog("\ngetStatsPage() error: failed to get campaign performance stats\n"
-                        , err, _logsPath)
+                ErrorHandler().printToLog("\ngetStatsPage() error: failed to get campaign performance stats\n"
+                        , err, logsPath)
 
         def getStatsTable(self):
             ''' Will read the Campaign Performance Report table 
@@ -644,7 +641,7 @@ class AutoRevPie:
                 WebDriverWait(browser, 30).until(
                         expected_conditions.presence_of_element_located(
                                 (By.XPATH, "//table[@class='table striped bordered hovered']")))
-                waiting(1)
+                ErrorHandler().waiting(1)
                 root = lxml.html.fromstring(browser.page_source)
                 table = root.xpath("//table[@class='table striped bordered hovered']")[0]
                 # iterate over all the rows
@@ -675,9 +672,9 @@ class AutoRevPie:
                 print("\n", err)
                 sys.exit(1)
             except Exception as err:
-                printToLog("\n\ngetStatsTable(): error while loading table, check logs\n"
-                        , err, _logsPath)
-                checkBrowser()
+                ErrorHandler().printToLog("\n\ngetStatsTable(): error while loading table, check logs\n"
+                        , err, logsPath)
+                ErrorHandler().checkBrowser()
 
         def getStatsUpdate(self, currentCampaign, campaignName):
             ''' Will check if currentCampaign has changed,
@@ -690,19 +687,87 @@ class AutoRevPie:
                 tableValues = self.getStatsTable()
                 return(tableValues)
             else:
-                switchToTab(self.revpieStatsTab)
+                ErrorHandler().switchToTab(self.revpieStatsTab)
                 try:
                     browser.refresh()
-                    waiting(1)
+                    ErrorHandler().waiting(1)
                     WebDriverWait(browser, 7).until(
                             expected_conditions.alert_is_present())
                     alert = browser.switch_to.alert
                     alert.accept() # accept form resubmit
                 except TimeoutException as err:
-                    printToLog("\n\ngetRepsUpdate(): timeout exception\n"
-                            , err, _logsPath)
+                    ErrorHandler().printToLog("\n\ngetRepsUpdate(): timeout exception\n"
+                            , err, logsPath)
                 tableValues = self.getStatsTable()
                 return(tableValues)
+
+class ErrorHandler:
+    ''' Handles exceptions and logging.
+    '''
+    def printToLog(self, message, err, _fpath):
+        ''' Will print message to screen, and Exception as err
+            with traceback to 'logs.txt'
+        '''
+        # print message to screen
+        print(message)
+        if _fpath is None:
+            _fpath = self.getLogFile()
+        # print error message to file with timestamp and Exception
+        _fpath = _fpath
+        with open(_fpath, 'a') as f:
+            print(datetime.datetime.now(), '\n' + ('-' * 20), message, file=f)
+            print(str(err), file=f)
+            print(traceback.format_exc(), file=f)
+
+    def getLogFile(self):
+        try:
+            with open ((Config.config_path+"/config.ini"), 'r') as f:
+                    _logsPath=f.readline()
+        except:
+            _logsPath=Config.config_path+"/error_logs.txt"
+        return(_logsPath)
+
+    def waiting(self, duration):
+        ''' Will call time.sleep(duration) and handle KeyboardInterrupt exceptions.
+        '''
+        try:
+            time.sleep(duration)
+        except KeyboardInterrupt as err:
+            self.printToLog("\n"
+                        , err, logsPath)
+            self.checkBrowser()
+
+    def switchToTab(self, tab):
+        ''' Will switch browser tabs by index. \n
+            : Arg :  (tab)
+            - takes an int type corresponding to the browser tab index
+        '''
+        try:
+            self.waiting(1)
+            browser.switch_to.window(browser.window_handles[tab])
+        except Exception as err:
+            self.printToLog("\n\n\nswitchTabs: Error while switching tabs, closing...\n"
+                        , err, logsPath)
+        except KeyboardInterrupt as err:
+            self.printToLog("\n"
+                        , err, logsPath)
+            sys.exit(1)
+
+    def checkBrowser(self):
+        ''' Will call webdriver.title to check if browser is currently open and responding.
+            If not, handles exceptions and exits program.
+        '''
+        try:
+            browser.title
+        except Exception as err:
+            self.printToLog("\n\ncheckBrowser: Error, closing...\n"
+                    , err, logsPath)
+            try:
+                sys.exit(1)
+                return(False)
+            except:pass
+        else:
+            return(True)
 
 # ---END OF CLASS DEF---
 ###############################################################################
@@ -722,8 +787,8 @@ def start_browser():
         browser.set_window_size(1920, 1080)
         return(browser)
     except Exception as err:
-        printToLog("\n\nWebDriver: Error on browser setup"
-                    , err, _logsPath)
+        ErrorHandler().printToLog("\n\nWebDriver: Error on browser setup"
+                    , err, logsPath)
         sys.exit(1)
 
 def getLoginInfo(_option):
@@ -737,8 +802,8 @@ def getLoginInfo(_option):
             print("\n")
             sys.exit(1)
         except Exception as err:
-            printToLog("\n\nError during user input, closing...\n"
-                        , err, _logsPath)
+            ErrorHandler().printToLog("\n\nError during user input, closing...\n"
+                        , err, logsPath)
             sys.exit(1)
     elif _option == '-p':
         try:
@@ -750,8 +815,8 @@ def getLoginInfo(_option):
             print("\n")
             sys.exit(1)
         except Exception as err:
-            printToLog("\n\nError during user input, closing...\n"
-                        , err, _logsPath)
+            ErrorHandler().printToLog("\n\nError during user input, closing...\n"
+                        , err, logsPath)
             sys.exit(1)
 
 def admin_login(_u, _p):
@@ -763,9 +828,9 @@ def admin_login(_u, _p):
                 expected_conditions.presence_of_element_located(
                         (By.ID, "UserName")))
     except Exception as err:
-        printToLog("\nBrowser Error: failed to login to admin, closing..."
-                , err, _logsPath)
-        checkBrowser()
+        ErrorHandler().printToLog("\nBrowser Error: failed to login to admin, closing..."
+                , err, logsPath)
+        ErrorHandler().checkBrowser()
         sys.exit(1)
     else:
         # type credentials
@@ -782,7 +847,7 @@ def admin_login(_u, _p):
                         (By.ID, 'formId')))
         # skip seat selection
         browser.execute_script("window.location = '/skipseat1234'")
-        waiting(1)
+        ErrorHandler().waiting(1)
 
 def queueDaddy_login(username, password):
     ''' *
@@ -793,9 +858,9 @@ def queueDaddy_login(username, password):
                 expected_conditions.presence_of_element_located(
                         (By.XPATH, "//input[@name='userName']")))
     except Exception as err:
-        printToLog("\nBrowser Error: failed to login to QueueDaddy, closing..."
-                , err, _logsPath)
-        checkBrowser()
+        ErrorHandler().printToLog("\nBrowser Error: failed to login to QueueDaddy, closing..."
+                , err, logsPath)
+        ErrorHandler().checkBrowser()
         sys.exit(1)
     else:
         text_area = browser.find_element_by_xpath("//input[@name='userName']")
@@ -804,62 +869,7 @@ def queueDaddy_login(username, password):
         text_area.send_keys(password)
 
         browser.find_element_by_xpath("//button[@value='Submit']").click()
-        waiting(1)
-
-def waiting(duration):
-    ''' Will call time.sleep(duration) and handle KeyboardInterrupt exceptions.
-    '''
-    try:
-        time.sleep(duration)
-    except KeyboardInterrupt as err:
-        printToLog("\n"
-                    , err, _logsPath)
-        checkBrowser()
-
-def switchToTab(tab):
-    ''' Will switch browser tabs by index. \n
-        : Arg :  (tab)
-        - takes an int type corresponding to the browser tab index
-    '''
-    try:
-        waiting(1)
-        browser.switch_to.window(browser.window_handles[tab])
-    except Exception as err:
-        printToLog("\n\n\nswitchTabs: Error while switching tabs, closing...\n"
-                    , err, _logsPath)
-    except KeyboardInterrupt as err:
-        printToLog("\n"
-                    , err, _logsPath)
-        sys.exit(1)
-
-def checkBrowser():
-    ''' Will call webdriver.title to check if browser is currently open and responding.
-        If not, handles exceptions and exits program.
-    '''
-    try:
-        browser.title
-    except Exception as err:
-        printToLog("\n\ncheckBrowser: Error, closing...\n"
-                , err, _logsPath)
-        try:
-            sys.exit(1)
-            return(False)
-        except:pass
-    else:
-        return(True)
-
-def printToLog(message, err, _fpath):
-    ''' Will print message to screen, and Exception as err
-        with traceback to 'logs.txt'
-    '''
-    # print message to screen
-    print(message)
-    # print error message to file with timestamp and Exception
-    _fpath = _logsPath
-    with open(_fpath, 'a') as f:
-        print(datetime.datetime.now(), '\n' + ('-' * 20), message, file=f)
-        print(str(err), file=f)
-        print(traceback.format_exc(), file=f)
+        ErrorHandler().waiting(1)
 
 # ---END OF FUNC DEFS---
 ###############################################################################

@@ -22,18 +22,14 @@ print("\n####################################################################\n"
 print("\nloading . . . \n")
 
 # Open log file 'logs.txt' for logging
-_loop = True
-while _loop:
-    try:
-        with open ((Config.config_path+"/config.ini"), 'r') as f:
-                _logsPath=f.readline()
-        with open(_logsPath, 'w') as f:
-            print('Filename:', _logsPath, file=f)
-            print('\n - - - Logs (' + str(time.strftime("%Y-%m-%d %H:%M.%S")) + ')' + ' - - - ' + '\n\n', file=f)
-            _loop = False
-    except KeyboardInterrupt:
-        sys.exit(1)
-    except Exception:pass
+try:
+    with open(ARP.ErrorHandler().getLogFile(), 'w') as f:
+        print('Filename:', ARP.ErrorHandler().getLogFile(), file=f)
+        print('\n - - - Logs (' + str(time.strftime("%Y-%m-%d %H:%M.%S")) + ')' + ' - - - ' + '\n\n', file=f)
+        _loop = False
+except KeyboardInterrupt:
+    sys.exit(1)
+except Exception:pass
 
 ################################ CONFIG #######################################
 # CONFIG FILE SHOULD BE IN THE WORKING DIRECTORY
@@ -54,8 +50,8 @@ except KeyboardInterrupt:
     print("\n")
     sys.exit(1)
 except Exception as err:
-    ARP.printToLog("\n\nconfigParser: Error while reading config file 'config.txt', closing..."
-                , err, _logsPath)
+    ARP.ErrorHandler().printToLog("\n\nconfigParser: Error while reading config file 'config.txt', closing..."
+                , err, ARP.ErrorHandler().getLogFile())
     sys.exit(1)
 
 ############################# browser setup ###################################
@@ -67,25 +63,25 @@ CampaignStats = AutoRP_obj.RevPieStats(3)
 try:
     # load wallboard
     ARP.browser.get(wallboard)
-    ARP.waiting(1)
+    ARP.ErrorHandler().waiting(1)
     ARP.queueDaddy_login(queue_uname, queue_pass)
-    ARP.waiting(1)
+    ARP.ErrorHandler().waiting(1)
     # load admin page
     ARP.browser.execute_script("window.open('" + admin + "')")
     # login to admin
-    ARP.waiting(1)
-    ARP.switchToTab(AutoRP_obj.bidsPageTab)
+    ARP.ErrorHandler().waiting(1)
+    ARP.ErrorHandler().switchToTab(AutoRP_obj.bidsPageTab)
     _loop = True
     while _loop:
         try:
-            _loop = ARP.checkBrowser()
+            _loop = ARP.ErrorHandler().checkBrowser()
             ARP.admin_login(ARP.getLoginInfo('-u'), ARP.getLoginInfo('-p'))
         except KeyboardInterrupt:
             print("\n")
             sys.exit(1)
         except Exception as err:
-            ARP.printToLog("\nError: Incorrect Username/Password, try again...\n"
-                        , err, _logsPath)
+            ARP.ErrorHandler().printToLog("\nError: Incorrect Username/Password, try again...\n"
+                        , err, ARP.ErrorHandler().getLogFile())
             print("\n . . . \n")
         else:
             _loop = False
@@ -93,20 +89,20 @@ try:
     AutoRP_obj.openBidAdjustments()
     AutoRP_obj.getCampaignStatus()
     # get initial rep count
-    ARP.waiting(1)
+    ARP.ErrorHandler().waiting(1)
     ARP.browser.execute_script("window.open('" + admin + "')")
-    ARP.switchToTab(RepCounter.queueOrderTab)
+    ARP.ErrorHandler().switchToTab(RepCounter.queueOrderTab)
     repsAvail = RepCounter.getRepsMain()
     # load campaign performance page
     ARP.browser.execute_script("window.open('" + admin + "/Affiliates/RevPieCampaignPerformance')")
-    ARP.switchToTab(CampaignStats.revpieStatsTab)
-    ARP.waiting(1)
+    ARP.ErrorHandler().switchToTab(CampaignStats.revpieStatsTab)
+    ARP.ErrorHandler().waiting(1)
 except KeyboardInterrupt:
     print("\n")
     sys.exit(1)
 except Exception as err:
-    ARP.printToLog("\n\nError while loading tabs, closing...\n"
-                , err, _logsPath)
+    ARP.ErrorHandler().printToLog("\n\nError while loading tabs, closing...\n"
+                , err, ARP.ErrorHandler().getLogFile())
     ARP.browser.quit()
     sys.exit(1)
 
@@ -115,15 +111,15 @@ except Exception as err:
 AutoRP_obj.printIsPaused()
 _loop = True
 while _loop:
-    _loop = ARP.checkBrowser()
+    _loop = ARP.ErrorHandler().checkBrowser()
     try:
         AutoRP_obj.autoRevPie(RepCounter.repCount)
     except KeyboardInterrupt:
         print("\n")
         sys.exit(1)
     except Exception as err:
-        ARP.printToLog("\n\nError: error while executing AutoRevPie, closing...\n"
-                    , err, _logsPath)
+        ARP.ErrorHandler().printToLog("\n\nError: error while executing AutoRevPie, closing...\n"
+                    , err, ARP.ErrorHandler().getLogFile())
         ARP.browser.quit()
         sys.exit(1)
     # update revpieStats on every 5th minute of the hour...
@@ -132,39 +128,39 @@ while _loop:
         # also update queue order if 10th minute of the hour...
         if datetime.datetime.now().minute % 10 == 0:
             try:
-                ARP.waiting(1)
+                ARP.ErrorHandler().waiting(1)
                 RepCounter.repCount = RepCounter.getRepsUpdate()
-                ARP.waiting(1)
+                ARP.ErrorHandler().waiting(1)
                 print('\n', CampaignStats.getStatsUpdate(AutoRP_obj.currentCampaign
                                                     , AutoRP_obj.campaigns[AutoRP_obj.currentCampaign][0]), '\n')
                 _wait = True
                 while _wait:
                     if datetime.datetime.now().minute == (_startTime + 1):
                         _wait = False
-                    ARP.waiting(1)
+                    ARP.ErrorHandler().waiting(1)
                     AutoRP_obj.autoRevPie(RepCounter.repCount)
             except KeyboardInterrupt:
                 print("\n")
                 sys.exit(1)
             except Exception as err:
-                ARP.printToLog("\n\nError: unable to update rep count..."
-                , err, _logsPath)
+                ARP.ErrorHandler().printToLog("\n\nError: unable to update rep count..."
+                , err, ARP.ErrorHandler().getLogFile())
         else: # else just get revpieStats
             try:
                 print('\n', CampaignStats.getStatsUpdate(AutoRP_obj.currentCampaign
                                                     , AutoRP_obj.campaigns[AutoRP_obj.currentCampaign][0]), '\n')
-                ARP.waiting(1)
+                ARP.ErrorHandler().waiting(1)
                 _wait = True
                 while _wait:
                     if datetime.datetime.now().minute == (_startTime + 1):
                         _wait = False
-                    ARP.waiting(1)
+                    ARP.ErrorHandler().waiting(1)
                     AutoRP_obj.autoRevPie(RepCounter.repCount)
             except KeyboardInterrupt:
                 print("\n")
                 sys.exit(1)
             except Exception as err:
-                ARP.printToLog("\n\nError: unable to update revpieStats..."
-                , err, _logsPath)
+                ARP.ErrorHandler().printToLog("\n\nError: unable to update revpieStats..."
+                , err, ARP.ErrorHandler().getLogFile())
 
 

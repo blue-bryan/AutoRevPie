@@ -1,2 +1,2 @@
-from AutomateRevPie.AutomateRevPie import *
 from AutomateRevPie.config import *
+from AutomateRevPie.AutomateRevPie import *
