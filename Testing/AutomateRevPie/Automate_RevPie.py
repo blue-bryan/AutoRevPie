@@ -8,8 +8,6 @@
  traffic monitoring and the bidding process for RevPie.
 """
 
-import csv
-import lxml.html
 from bs4 import BeautifulSoup
 
 # get logs file path
@@ -415,7 +413,7 @@ class AutoRevPie:
                 Browser.WebDriverWait(Browser.browser, 15).until(
                         Browser.expected_conditions.presence_of_element_located(
                                 (Browser.By.XPATH, "//table[@class='table striped bordered hovered']")))
-                root = lxml.html.fromstring(Browser.browser.page_source)
+                root = Browser.Config.lxml.html.fromstring(Browser.browser.page_source)
                 table =  root.xpath("//table[@class='table striped bordered hovered']")[0]
                 # iterate over all the rows   
                 for row in table.xpath(".//tr"):
@@ -492,7 +490,7 @@ class AutoRevPie:
                             (Browser.By.ID,'bidAdjustmentsTable')))
             # get the table
             data = BeautifulSoup(Browser.browser.page_source, "lxml")
-            root = lxml.html.fromstring(Browser.browser.page_source)
+            root = Browser.Config.lxml.html.fromstring(Browser.browser.page_source)
             table = root.xpath("//table[@class='table striped nbm bordered']")[0]
             # iterate over all the rows
             tableValues = []
@@ -576,138 +574,8 @@ class AutoRevPie:
                     elif _option is None: # default will raise bids
                         _newBid = float(customBids[index]) + changeAmount
                         self.makeChange(_textBox, _newBid, item)
+
 # ******************************************************************
-
-    class RevPieStats:
-        ''' Will parse Campaign Performance Report to 
-            get performance statistics for sources.
-            - metrics: sourceID, clicks, applications, cost, revenue
-        '''
-        def __init__(self, _revpieStatsTab):
-            self.revpieStatsTab = _revpieStatsTab
-            self.currentCampaign = 0
-            self.tableHeaders = []
-            self.sourceIDs = []
-            self.clicks = []
-            self.appCount = []
-            self.cost = []
-            self.revenue = []
-
-        def getStatsPage(self, currentCampaign, campaignName):
-            ''' Will load Campaign Performance Report for the current campaign
-            '''
-            try:
-                Browser.ErrorHandler().switchToTab(self.revpieStatsTab)
-                Browser.browser.execute_script("window.location = '/Affiliates/RevPieCampaignPerformance'")
-                Browser.ErrorHandler().waiting(1)
-                Browser.WebDriverWait(Browser.browser, 60).until(
-                        Browser.expected_conditions.presence_of_element_located(
-                                (Browser.By.NAME, "CampaignId")))
-                self.currentCampaign = currentCampaign
-                if self.currentCampaign == 0:
-                    Browser.browser.find_element_by_xpath(
-                            "//select[@name='CampaignId']/option[text()='" + campaignName + "']").click()
-                if self.currentCampaign == 1:
-                    Browser.browser.find_element_by_xpath(
-                            "//select[@name='CampaignId']/option[text()='" + campaignName + "']").click()
-                if self.currentCampaign == 2:
-                    Browser.browser.find_element_by_xpath(
-                            "//select[@name='CampaignId']/option[text()='" + campaignName + "']").click()
-                Browser.browser.find_element_by_name('GetReport').click()
-            except KeyboardInterrupt as err:
-                print("\n", err)
-                Browser.sys.exit(1)
-            except Exception as err:
-                Browser.ErrorHandler().printToLog("\ngetStatsPage() error: failed to get campaign performance stats\n"
-                        , err, Browser.ErrorHandler().getLogFile())
-
-        def getStatsTable(self):
-            ''' Will read the Campaign Performance Report table 
-                and store each metric in a separate array.
-                * Returns a tuple of arrays.
-            '''
-            try:
-                Browser.WebDriverWait(Browser.browser, 30).until(
-                        Browser.expected_conditions.presence_of_element_located(
-                                (Browser.By.XPATH, "//table[@class='table striped bordered hovered']")))
-                Browser.ErrorHandler().waiting(1)
-                root = lxml.html.fromstring(Browser.browser.page_source)
-                table = root.xpath("//table[@class='table striped bordered hovered']")[0]
-                # iterate over all the rows
-                tableValues = []
-                self.clicks = []
-                self.appCount = []
-                self.cost = []
-                self.revenue = []
-                for td in table.xpath('.//td'):
-                    tableValues.append(td.text)
-                self.tableHeaders.append(tableValues[:10])
-                self.sourceIDs.append(tableValues[::10])
-                _i = 0
-                try:
-                    for index in range(len(tableValues)):
-                        if tableValues[index] == self.sourceIDs[0][_i]:
-                            self.clicks.append(tableValues[index+1])
-                            self.appCount.append(tableValues[index+2])
-                            self.cost.append(tableValues[index+3])
-                            self.revenue.append(tableValues[index+4])
-                            _i += 1
-                except:pass
-                return( self.tableHeaders
-                      , self.sourceIDs[0]
-                      , self.clicks
-                      , self.appCount
-                      , self.cost
-                      , self.revenue )
-            except KeyboardInterrupt as err:
-                print("\n", err)
-                Browser.sys.exit(1)
-            except Exception as err:
-                Browser.ErrorHandler().printToLog("\n\ngetStatsTable(): error while loading table, check logs\n"
-                        , err, Browser.ErrorHandler().getLogFile())
-                Browser.ErrorHandler().checkBrowser()
-
-        def getStatsUpdate(self, currentCampaign, campaignName):
-            ''' Will check if currentCampaign has changed,
-                then will call getStatsTable() to get updated values.
-                * Returns a tuple of arrays, each metric is a separate array.
-            '''
-            if currentCampaign != self.currentCampaign:
-                self.getStatsPage(currentCampaign, campaignName)
-                self.currentCampaign = currentCampaign
-                tableValues = self.getStatsTable()
-                return(tableValues)
-            else:
-                Browser.ErrorHandler().switchToTab(self.revpieStatsTab)
-                try:
-                    Browser.browser.refresh()
-                    Browser.ErrorHandler().waiting(1)
-                    Browser.WebDriverWait(Browser.browser, 7).until(
-                            Browser.expected_conditions.alert_is_present())
-                    alert = Browser.browser.switch_to.alert
-                    alert.accept() # accept form resubmit
-                except Browser.TimeoutException as err:
-                    Browser.ErrorHandler().printToLog("\n\ngetRepsUpdate(): timeout exception\n"
-                            , err, Browser.ErrorHandler().getLogFile())
-                tableValues = self.getStatsTable()
-                return(tableValues)
-
-        def output_stats(self, _mode = None):
-            ''' Will output campaign stats to file.
-            '''
-            _f = Browser.Config.getfpath(__file__) + 'rp_stats(' + Browser.Config.time.strftime("%Y.%m.%d") + ').csv'
-            _existingFile = Browser.Config.os.path.isfile(_f)
-            if not _existingFile: # write header to file is does not exist already
-                _mode =  "-headers"
-            with open(_f,'a') as _csvfile:
-                csvWriter = csv.writer(_csvfile, delimiter=",")
-                if _mode == "-headers":
-                    csvWriter.writerow(self.tableHeaders)
-                csvWriter.writerow(zip( [ self.sourceIDs[0]
-                                        , self.clicks
-                                        , self.appCount
-                                        , self.cost
-                                        , self.revenue ] ))
 
 # ******************************************************************
 # ---END OF CLASS DEFS---

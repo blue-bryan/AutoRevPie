@@ -13,6 +13,7 @@ import configparser
 
 import setup
 import AutomateRevPie.Automate_RevPie as ARP
+import AutomateRevPie.RevPieStats as RP_Stats
 
 ###############################################################################
 # Program start...
@@ -59,7 +60,7 @@ except Exception as err:
 
 AutoRP_obj = ARP.AutoRevPie(admin, 0, 1)
 RepCounter = AutoRP_obj.RepCount(2)
-CampaignStats = AutoRP_obj.RevPieStats(3)
+CampaignStats = RP_Stats.RevPieStats(3, ARP.Browser.browser)
 
 try:
     # load wallboard
