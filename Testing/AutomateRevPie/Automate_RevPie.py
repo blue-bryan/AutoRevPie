@@ -9,6 +9,7 @@
 """
 
 import sys
+import csv
 import time
 import datetime
 import lxml.html
@@ -599,6 +600,7 @@ class AutoRevPie:
         def __init__(self, _revpieStatsTab):
             self.revpieStatsTab = _revpieStatsTab
             self.currentCampaign = 0
+            self.tableHeaders = []
             self.sourceIDs = []
             self.clicks = []
             self.appCount = []
@@ -653,6 +655,7 @@ class AutoRevPie:
                 self.revenue = []
                 for td in table.xpath('.//td'):
                     tableValues.append(td.text)
+                self.tableHeaders.append(tableValues[:10])
                 self.sourceIDs.append(tableValues[::10])
                 _i = 0
                 try:
@@ -664,7 +667,8 @@ class AutoRevPie:
                             self.revenue.append(tableValues[index+4])
                             _i += 1
                 except:pass
-                return( self.sourceIDs[0]
+                return( self.tableHeaders
+                      , self.sourceIDs[0]
                       , self.clicks
                       , self.appCount
                       , self.cost
@@ -701,6 +705,23 @@ class AutoRevPie:
                             , err, logsPath)
                 tableValues = self.getStatsTable()
                 return(tableValues)
+
+        def output_stats(self, _mode = None):
+            ''' Will output campaign stats to file.
+            '''
+            _f = Config.getfpath(__file__) + 'rp_stats(' + time.strftime("%Y.%m.%d") + ').csv'
+            _existingFile = Config.os.path.isfile(_f)
+            if not _existingFile: # write header to file is does not exist already
+                _mode =  "-headers"
+            with open(_f,'a') as _csvfile:
+                csvWriter = csv.writer(_csvfile, delimiter=",")
+                if _mode == "-headers":
+                    csvWriter.writerow(self.tableHeaders)
+                csvWriter.writerow(zip( [ self.sourceIDs[0]
+                                        , self.clicks
+                                        , self.appCount
+                                        , self.cost
+                                        , self.revenue ] ))
 
 # ******************************************************************
 
@@ -766,9 +787,10 @@ class ErrorHandler:
             self.printToLog("\n\ncheckBrowser: Error, closing...\n"
                     , err, logsPath)
             try:
-                sys.exit(1)
-                return(False)
+                browser.quit()
             except:pass
+            sys.exit(1)
+            return(False)
         else:
             return(True)
 

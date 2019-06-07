@@ -29,6 +29,7 @@ try:
         print('\n - - - Logs (' + str(time.strftime("%Y-%m-%d %H:%M.%S")) + ')' + ' - - - ' + '\n\n', file=f)
         _loop = False
 except KeyboardInterrupt:
+    print("\n")
     sys.exit(1)
 except Exception:pass
 
@@ -98,6 +99,8 @@ try:
     ARP.browser.execute_script("window.open('" + admin + "/Affiliates/RevPieCampaignPerformance')")
     ARP.ErrorHandler().switchToTab(CampaignStats.revpieStatsTab)
     ARP.ErrorHandler().waiting(1)
+    CampaignStats.getStatsPage(AutoRP_obj.currentCampaign
+                                            , AutoRP_obj.campaigns[AutoRP_obj.currentCampaign][0])
 except KeyboardInterrupt:
     print("\n")
     sys.exit(1)
@@ -134,6 +137,7 @@ while _loop:
                 ARP.ErrorHandler().waiting(1)
                 CampaignStats.getStatsUpdate(AutoRP_obj.currentCampaign
                                             , AutoRP_obj.campaigns[AutoRP_obj.currentCampaign][0])
+                CampaignStats.output_stats()
                 _wait = True
                 while _wait:
                     if datetime.datetime.now().minute == (_startTime + 1):
@@ -150,6 +154,7 @@ while _loop:
             try:
                 CampaignStats.getStatsUpdate(AutoRP_obj.currentCampaign
                                             , AutoRP_obj.campaigns[AutoRP_obj.currentCampaign][0])
+                CampaignStats.output_stats()
                 ARP.ErrorHandler().waiting(1)
                 _wait = True
                 while _wait:
