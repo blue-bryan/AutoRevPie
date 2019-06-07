@@ -111,63 +111,10 @@ except Exception as err:
     ARP.Browser.browser.quit()
     ARP.Browser.sys.exit(1)
 
-############################### - MAIN - ######################################
+############################### - MAIN - ######################################\
 
-AutoRP_obj.printIsPaused()
-_loop = True
-while _loop:
-    _loop = ARP.Browser.ErrorHandler().checkBrowser()
-    try:
-        AutoRP_obj.autoRevPie(RepCounter.repCount)
-    except KeyboardInterrupt:
-        print("\n")
-        sys.exit(1)
-    except Exception as err:
-        ARP.Browser.ErrorHandler().printToLog("\n\nError: error while executing AutoRevPie, closing...\n"
-                    , err, ARP.Browser.ErrorHandler().getLogFile())
-        ARP.Browser.browser.quit()
-        ARP.Browser.sys.exit(1)
-    # update revpieStats on every 5th minute of the hour...
-    if datetime.datetime.now().minute % 5 == 0:
-        _startTime = datetime.datetime.now().minute
-        # also update queue order if 10th minute of the hour...
-        if datetime.datetime.now().minute % 10 == 0:
-            try:
-                ARP.Browser.ErrorHandler().waiting(1)
-                RepCounter.repCount = RepCounter.getRepsUpdate()
-                ARP.Browser.ErrorHandler().waiting(1)
-                CampaignStats.getStatsUpdate(AutoRP_obj.currentCampaign
-                                            , AutoRP_obj.campaigns[AutoRP_obj.currentCampaign][0])
-                CampaignStats.output_stats()
-                _wait = True
-                while _wait:
-                    if datetime.datetime.now().minute == (_startTime + 1):
-                        _wait = False
-                    ARP.Browser.ErrorHandler().waiting(1)
-                    AutoRP_obj.autoRevPie(RepCounter.repCount)
-            except KeyboardInterrupt:
-                print("\n")
-                sys.exit(1)
-            except Exception as err:
-                ARP.Browser.ErrorHandler().printToLog("\n\nError: unable to update rep count..."
-                , err, ARP.Browser.ErrorHandler().getLogFile())
-        else: # else just get revpieStats
-            try:
-                CampaignStats.getStatsUpdate(AutoRP_obj.currentCampaign
-                                            , AutoRP_obj.campaigns[AutoRP_obj.currentCampaign][0])
-                CampaignStats.output_stats()
-                ARP.Browser.ErrorHandler().waiting(1)
-                _wait = True
-                while _wait:
-                    if datetime.datetime.now().minute == (_startTime + 1):
-                        _wait = False
-                    ARP.Browser.ErrorHandler().waiting(1)
-                    AutoRP_obj.autoRevPie(RepCounter.repCount)
-            except KeyboardInterrupt:
-                print("\n")
-                sys.exit(1)
-            except Exception as err:
-                ARP.Browser.ErrorHandler().printToLog("\n\nError: unable to update revpieStats..."
-                , err, ARP.Browser.ErrorHandler().getLogFile())
-
-
+AutoRP_obj.currentCampaign = 1
+AutoRP_obj.switchCampaigns( AutoRP_obj.campaigns[AutoRP_obj.currentCampaign-1][1]
+                    , AutoRP_obj.campaigns[AutoRP_obj.currentCampaign-1][0]
+                    , AutoRP_obj.campaigns[AutoRP_obj.currentCampaign][1]
+                    , AutoRP_obj.campaigns[AutoRP_obj.currentCampaign][0])

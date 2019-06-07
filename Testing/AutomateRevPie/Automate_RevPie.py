@@ -135,9 +135,9 @@ class AutoRevPie:
         '''
         BidAdjuster = AutoRevPie.autoBidAdjust()
         Browser.ErrorHandler().switchToTab(self.bidsPageTab)
-        #browser.execute_script("changeRevPieCampaignStatus(" + campaignID_1 + ", 1)")
+        Browser.browser.execute_script("changeRevPieCampaignStatus(" + campaignID_1 + ", 1)")
         Browser.ErrorHandler().waiting(1)
-        #browser.execute_script("changeRevPieCampaignStatus(" + campaignID_2 + ", 0)")
+        Browser.browser.execute_script("changeRevPieCampaignStatus(" + campaignID_2 + ", 0)")
         Browser.ErrorHandler().waiting(2)
         Browser.browser.execute_script("revPieBidAdjustments("
                                 + campaignID_1 + ", '" + campaignName_1 + "')")
@@ -152,9 +152,9 @@ class AutoRevPie:
         Browser.ErrorHandler().waiting(2)
         Browser.browser.execute_script("revPieBidAdjustments("
                                 + campaignID_2 + ", '" + campaignName_2 + "')")
-        Browser.ErrorHandler().waiting(5)
+        Browser.ErrorHandler().waiting(2)
         BidAdjuster.changeBids(*Bids, _option='-p')
-        Browser.ErrorHandler().waiting(1)
+        Browser.ErrorHandler().waiting(2)
         Browser.browser.execute_script("$.Dialog.close()")
 
     def watchCalls(self, campaignID, campaignName):
@@ -374,83 +374,6 @@ class AutoRevPie:
 
 # ******************************************************************
 
-    class RepCount:
-        ''' Will open QueueOrder page,
-            parse table to get repCount,
-            and refresh page to get updated count
-        '''
-        def __init__ (self, _queueOrderTab):
-            self.queueOrderTab = _queueOrderTab
-            self.repCount = 0
-
-        def getRepsMain(self):
-            ''' Will load QueueOrder page in new tab,
-                then selects the Rollover queue.
-                * Returns the initial repCount as int
-            '''
-            try:
-                Browser.browser.execute_script("window.location = '/Maintenance/QueueOrder'")
-                Browser.ErrorHandler().waiting(1)
-                Browser.WebDriverWait(Browser.browser, 10).until(
-                        Browser.expected_conditions.presence_of_element_located(
-                                (Browser.By.XPATH, "//select[@name='queueNumber']/option[text()='Rollover']")))
-                Browser.browser.find_element_by_xpath(
-                        "//select[@name='queueNumber']/option[text()='Rollover']").click()
-                Browser.browser.find_element_by_name('QueueList').click()
-                Browser.ErrorHandler().waiting(1)
-                self.repCount = self.getRepsTable()
-                return(self.repCount)
-            except Exception as err:
-                Browser.ErrorHandler().printToLog("\nBrowser error, failed to get queue order\n"
-                        , err, Browser.ErrorHandler().getLogFile())
-                return(None)
-
-        def getRepsTable(self):
-            ''' Will parse the QueueList table,
-                and return repCount as int
-            '''
-            try: # get the table
-                Browser.WebDriverWait(Browser.browser, 15).until(
-                        Browser.expected_conditions.presence_of_element_located(
-                                (Browser.By.XPATH, "//table[@class='table striped bordered hovered']")))
-                root = Browser.Config.lxml.html.fromstring(Browser.browser.page_source)
-                table =  root.xpath("//table[@class='table striped bordered hovered']")[0]
-                # iterate over all the rows   
-                for row in table.xpath(".//tr"):
-                    # get the text from all the td's from each row
-                    repTable = [td.text for td in row.xpath(".//td[text()][last()-2]")]
-                self.repCount = list(map(int, repTable))
-                return(int(self.repCount[0]))
-            except Exception as err:
-                Browser.ErrorHandler().printToLog("\n\nError: failed to get reps in queue\n"
-                        , err, Browser.ErrorHandler().getLogFile())
-                Browser.ErrorHandler().waiting(1)
-                return(None)
-
-        def getRepsUpdate(self):
-            ''' Method to update repCount value
-                after getRepsMain() has been called.
-                * Should be called only once every 10 minutes.
-            '''
-            try:
-                # switch to tab for queue order
-                Browser.ErrorHandler().switchToTab(self.queueOrderTab)
-                Browser.ErrorHandler().waiting(1)
-                Browser.browser.refresh()
-                Browser.ErrorHandler().waiting(1)
-                Browser.WebDriverWait(Browser.browser, 5).until(
-                        Browser.expected_conditions.alert_is_present())
-                alert = Browser.browser.switch_to.alert
-                alert.accept() # accept form resubmit
-            except Browser.TimeoutException as err:
-                Browser.ErrorHandler().printToLog("getRepsUpdate(): timeout exception"
-                        , err, Browser.ErrorHandler().getLogFile())
-            Browser.ErrorHandler().waiting(1)
-            self.repCount = self.getRepsTable()
-            return(self.repCount)
-
-# ******************************************************************
-
     class autoBidAdjust:
         ''' Contains methods to automatically manipulate RevPie bids.\n
             :Methods:
@@ -512,7 +435,7 @@ class AutoRevPie:
                 except:pass
             return( self.sourceIDs[0]
                   , self.clicksPerMin
-                  , self.customBids)
+                  , self.customBids )
 
         def makeChange(self, __textBox, __newBid, _item):
             ''' changeBids() helper function.\n
@@ -543,7 +466,7 @@ class AutoRevPie:
             '''
             if _option == '-p': # change date filter to All if pasting bids
                 Browser.browser.execute_script("changeBidAdjustmentsDateFilter('all')")
-                Browser.ErrorHandler().waiting(1)
+                Browser.ErrorHandler().waiting(2)
                 _loop = True
                 while _loop:
                     if (str(Browser.browser.find_element_by_id(
@@ -552,7 +475,7 @@ class AutoRevPie:
                         _loop = False
                     else:
                         Browser.ErrorHandler().checkBrowser()
-                Browser.ErrorHandler().waiting(1)
+                Browser.ErrorHandler().waiting(2)
                 Browser.WebDriverWait(Browser.browser, 15).until(
                         Browser.expected_conditions.presence_of_element_located(
                                 (Browser.By.ID, 'bidAdjustmentsTable')))
@@ -560,7 +483,7 @@ class AutoRevPie:
             for index, item in enumerate(sourceIDs):
                 _customBidID = r"customBid_" + str(item)
                 try:
-                    _textBox = browser.find_element_by_id(_customBidID)
+                    _textBox = Browser.browser.find_element_by_id(_customBidID)
                 except:pass # will pass if the sourceID is not available
                 else:
                     if _option == '-p': # paste bids
@@ -574,6 +497,83 @@ class AutoRevPie:
                     elif _option is None: # default will raise bids
                         _newBid = float(customBids[index]) + changeAmount
                         self.makeChange(_textBox, _newBid, item)
+
+####################################################################
+
+class RepCount:
+    ''' Will open QueueOrder page,
+        parse table to get repCount,
+        and refresh page to get updated count
+    '''
+    def __init__ (self, _queueOrderTab):
+        self.queueOrderTab = _queueOrderTab
+        self.repCount = 0
+
+    def getRepsMain(self):
+        ''' Will load QueueOrder page in new tab,
+            then selects the Rollover queue.
+            * Returns the initial repCount as int
+        '''
+        try:
+            Browser.browser.execute_script("window.location = '/Maintenance/QueueOrder'")
+            Browser.ErrorHandler().waiting(1)
+            Browser.WebDriverWait(Browser.browser, 10).until(
+                    Browser.expected_conditions.presence_of_element_located(
+                            (Browser.By.XPATH, "//select[@name='queueNumber']/option[text()='Rollover']")))
+            Browser.browser.find_element_by_xpath(
+                    "//select[@name='queueNumber']/option[text()='Rollover']").click()
+            Browser.browser.find_element_by_name('QueueList').click()
+            Browser.ErrorHandler().waiting(1)
+            self.repCount = self.getRepsTable()
+            return(self.repCount)
+        except Exception as err:
+            Browser.ErrorHandler().printToLog("\nBrowser error, failed to get queue order\n"
+                    , err, Browser.ErrorHandler().getLogFile())
+            return(None)
+
+    def getRepsTable(self):
+        ''' Will parse the QueueList table,
+            and return repCount as int
+        '''
+        try: # get the table
+            Browser.WebDriverWait(Browser.browser, 15).until(
+                    Browser.expected_conditions.presence_of_element_located(
+                            (Browser.By.XPATH, "//table[@class='table striped bordered hovered']")))
+            root = Browser.Config.lxml.html.fromstring(Browser.browser.page_source)
+            table =  root.xpath("//table[@class='table striped bordered hovered']")[0]
+            # iterate over all the rows   
+            for row in table.xpath(".//tr"):
+                # get the text from all the td's from each row
+                repTable = [td.text for td in row.xpath(".//td[text()][last()-2]")]
+            self.repCount = list(map(int, repTable))
+            return(int(self.repCount[0]))
+        except Exception as err:
+            Browser.ErrorHandler().printToLog("\n\nError: failed to get reps in queue\n"
+                    , err, Browser.ErrorHandler().getLogFile())
+            Browser.ErrorHandler().waiting(1)
+            return(None)
+
+    def getRepsUpdate(self):
+        ''' Method to update repCount value
+            after getRepsMain() has been called.
+            * Should be called only once every 10 minutes.
+        '''
+        try:
+            # switch to tab for queue order
+            Browser.ErrorHandler().switchToTab(self.queueOrderTab)
+            Browser.ErrorHandler().waiting(1)
+            Browser.browser.refresh()
+            Browser.ErrorHandler().waiting(1)
+            Browser.WebDriverWait(Browser.browser, 5).until(
+                    Browser.expected_conditions.alert_is_present())
+            alert = Browser.browser.switch_to.alert
+            alert.accept() # accept form resubmit
+        except Browser.TimeoutException as err:
+            Browser.ErrorHandler().printToLog("getRepsUpdate(): timeout exception"
+                    , err, Browser.ErrorHandler().getLogFile())
+        Browser.ErrorHandler().waiting(1)
+        self.repCount = self.getRepsTable()
+        return(self.repCount)
 
 # ******************************************************************
 
