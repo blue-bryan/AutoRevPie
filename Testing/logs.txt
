@@ -1,27 +1,22 @@
 Filename: /home/bryan/Desktop/Utilities/Python/RevPie/AutoRevPie/Testing/logs.txt
 
 
- - - - Logs (2019-06-06 17:57.26) - - - 
+ - - - Logs (2019-06-06 21:28.15) - - - 
 
 
-2019-06-06 17:57:33.735798 
+2019-06-06 21:28:29.419008 
 -------------------- 
-Browser Error: failed to login to QueueDaddy, closing...
+
+
+switchTabs: Error while switching tabs, closing...
+
 Message: Failed to decode response from marionette
 
 Traceback (most recent call last):
-  File "/home/bryan/Desktop/Utilities/Python/RevPie/AutoRevPie/Testing/AutomateRevPie/Automate_RevPie.py", line 863, in queueDaddy_login
-    (By.XPATH, "//input[@name='userName']")))
-  File "/home/bryan/anaconda3/envs/environment_2/lib/python3.7/site-packages/selenium/webdriver/support/wait.py", line 71, in until
-    value = method(self._driver)
-  File "/home/bryan/anaconda3/envs/environment_2/lib/python3.7/site-packages/selenium/webdriver/support/expected_conditions.py", line 64, in __call__
-    return _find_element(driver, self.locator)
-  File "/home/bryan/anaconda3/envs/environment_2/lib/python3.7/site-packages/selenium/webdriver/support/expected_conditions.py", line 415, in _find_element
-    raise e
-  File "/home/bryan/anaconda3/envs/environment_2/lib/python3.7/site-packages/selenium/webdriver/support/expected_conditions.py", line 411, in _find_element
-    return driver.find_element(*by)
-  File "/home/bryan/anaconda3/envs/environment_2/lib/python3.7/site-packages/selenium/webdriver/remote/webdriver.py", line 978, in find_element
-    'value': value})['value']
+  File "/home/bryan/Desktop/Utilities/Python/RevPie/AutoRevPie/Testing/AutomateRevPie/InitBrowser.py", line 64, in switchToTab
+    browser.switch_to.window(browser.window_handles[tab])
+  File "/home/bryan/anaconda3/envs/environment_2/lib/python3.7/site-packages/selenium/webdriver/remote/webdriver.py", line 724, in window_handles
+    return self.execute(Command.W3C_GET_WINDOW_HANDLES)['value']
   File "/home/bryan/anaconda3/envs/environment_2/lib/python3.7/site-packages/selenium/webdriver/remote/webdriver.py", line 321, in execute
     self.error_handler.check_response(response)
   File "/home/bryan/anaconda3/envs/environment_2/lib/python3.7/site-packages/selenium/webdriver/remote/errorhandler.py", line 242, in check_response
@@ -29,7 +24,7 @@ Traceback (most recent call last):
 selenium.common.exceptions.WebDriverException: Message: Failed to decode response from marionette
 
 
-2019-06-06 17:57:33.748037 
+2019-06-06 21:28:29.433496 
 -------------------- 
 
 checkBrowser: Error, closing...
@@ -37,29 +32,7 @@ checkBrowser: Error, closing...
 Message: Tried to run command without establishing a connection
 
 Traceback (most recent call last):
-  File "/home/bryan/Desktop/Utilities/Python/RevPie/AutoRevPie/Testing/AutomateRevPie/Automate_RevPie.py", line 863, in queueDaddy_login
-    (By.XPATH, "//input[@name='userName']")))
-  File "/home/bryan/anaconda3/envs/environment_2/lib/python3.7/site-packages/selenium/webdriver/support/wait.py", line 71, in until
-    value = method(self._driver)
-  File "/home/bryan/anaconda3/envs/environment_2/lib/python3.7/site-packages/selenium/webdriver/support/expected_conditions.py", line 64, in __call__
-    return _find_element(driver, self.locator)
-  File "/home/bryan/anaconda3/envs/environment_2/lib/python3.7/site-packages/selenium/webdriver/support/expected_conditions.py", line 415, in _find_element
-    raise e
-  File "/home/bryan/anaconda3/envs/environment_2/lib/python3.7/site-packages/selenium/webdriver/support/expected_conditions.py", line 411, in _find_element
-    return driver.find_element(*by)
-  File "/home/bryan/anaconda3/envs/environment_2/lib/python3.7/site-packages/selenium/webdriver/remote/webdriver.py", line 978, in find_element
-    'value': value})['value']
-  File "/home/bryan/anaconda3/envs/environment_2/lib/python3.7/site-packages/selenium/webdriver/remote/webdriver.py", line 321, in execute
-    self.error_handler.check_response(response)
-  File "/home/bryan/anaconda3/envs/environment_2/lib/python3.7/site-packages/selenium/webdriver/remote/errorhandler.py", line 242, in check_response
-    raise exception_class(message, screen, stacktrace)
-selenium.common.exceptions.WebDriverException: Message: Failed to decode response from marionette
-
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "/home/bryan/Desktop/Utilities/Python/RevPie/AutoRevPie/Testing/AutomateRevPie/Automate_RevPie.py", line 764, in checkBrowser
+  File "/home/bryan/Desktop/Utilities/Python/RevPie/AutoRevPie/Testing/AutomateRevPie/InitBrowser.py", line 78, in checkBrowser
     browser.title
   File "/home/bryan/anaconda3/envs/environment_2/lib/python3.7/site-packages/selenium/webdriver/remote/webdriver.py", line 342, in title
     resp = self.execute(Command.GET_TITLE)
