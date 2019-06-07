@@ -6,6 +6,7 @@
 """
 
 import csv
+import re
 
 class RevPieStats:
     ''' Will parse Campaign Performance Report to 
@@ -136,10 +137,11 @@ class RevPieStats:
         with open(_fPath,'a') as _csvfile:
             csvWriter = csv.writer(_csvfile, delimiter=",")
             if _mode == "-headers":
-                csvWriter.writerow(self.tableHeaders)
+                csvWriter.writerow(self.tableHeaders[:5])
+            _output = list(zip( self.sourceIDs[0]
+               , self.clicks
+               , self.appCount
+               , self.cost
+               , self.revenue ))
             for index in range(len(self.sourceIDs[0])):
-                csvWriter.writerow(zip( [ self.sourceIDs[0][index]
-                                        , self.clicks[index]
-                                        , self.appCount[index]
-                                        , self.cost[index]
-                                        , self.revenue[index] ] ))
+                csvWriter.writerow(_output[index])
