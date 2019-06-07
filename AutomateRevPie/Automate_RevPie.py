@@ -491,9 +491,10 @@ class AutoRevPie:
                         self.makeChange(_textBox, _newBid, item)
                     elif _option == '-l': # lower bids
                         # if lowering bids check Clicks/min
-                        if float(self.clicksPerMin[index]) > minCPM:
-                            _newBid = float(customBids[index]) - changeAmount
-                            self.makeChange(_textBox, _newBid, item)
+                        if self.clicksPerMin[index] is not None:
+                            if float(self.clicksPerMin[index]) > minCPM:
+                                _newBid = float(customBids[index]) - changeAmount
+                                self.makeChange(_textBox, _newBid, item)
                     elif _option is None: # default will raise bids
                         _newBid = float(customBids[index]) + changeAmount
                         self.makeChange(_textBox, _newBid, item)

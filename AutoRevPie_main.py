@@ -100,8 +100,6 @@ try:
     ARP.Browser.browser.execute_script("window.open('" + admin + "/Affiliates/RevPieCampaignPerformance')")
     ARP.Browser.ErrorHandler().switchToTab(CampaignStats.revpieStatsTab)
     ARP.Browser.ErrorHandler().waiting(1)
-    CampaignStats.getStatsPage(AutoRP_obj.currentCampaign
-                                            , AutoRP_obj.campaigns[AutoRP_obj.currentCampaign][0])
 except KeyboardInterrupt:
     print("\n")
     sys.exit(1)
