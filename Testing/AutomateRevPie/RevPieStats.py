@@ -69,9 +69,10 @@ class RevPieStats:
             self.appCount = []
             self.cost = []
             self.revenue = []
+            for th in table.xpath('.//th'):
+                self.tableHeaders.append(th.text)
             for td in table.xpath('.//td'):
                 tableValues.append(td.text)
-            self.tableHeaders.append(tableValues[:10])
             self.sourceIDs.append(tableValues[::10])
             _i = 0
             try:
@@ -125,16 +126,20 @@ class RevPieStats:
     def output_stats(self, _mode = None):
         ''' Will output campaign stats to file.
         '''
-        _f = self.Browser.Config.getfpath(__file__) + 'rp_stats(' + self.Browser.Config.time.strftime("%Y.%m.%d") + ').csv'
-        _existingFile = self.Browser.Config.os.path.isfile(_f)
-        if not _existingFile: # write header to file is does not exist already
+        with open ((self.Browser.Config.config_path+"/config.ini"), 'r') as _f:
+                _fPath = self.Browser.Config.os.path.realpath(
+                            self.Browser.Config.os.path.join(
+                                _f.readline(), ('rp_stats(' + self.Browser.Config.time.strftime("%Y.%m.%d") + ').csv')))
+        _existingFile = self.Browser.Config.os.path.isfile(_fPath)
+        if not _existingFile: # write header to file if does not exist already
             _mode =  "-headers"
-        with open(_f,'a') as _csvfile:
+        with open(_fPath,'a') as _csvfile:
             csvWriter = csv.writer(_csvfile, delimiter=",")
             if _mode == "-headers":
                 csvWriter.writerow(self.tableHeaders)
-            csvWriter.writerow(zip( [ self.sourceIDs[0]
-                                    , self.clicks
-                                    , self.appCount
-                                    , self.cost
-                                    , self.revenue ] ))
+            for index in range(len(self.sourceIDs[0])):
+                csvWriter.writerow(zip( [ self.sourceIDs[0][index]
+                                        , self.clicks[index]
+                                        , self.appCount[index]
+                                        , self.cost[index]
+                                        , self.revenue[index] ] ))

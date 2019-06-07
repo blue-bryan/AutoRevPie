@@ -31,15 +31,16 @@ class ErrorHandler:
             _fpath = self.getLogFile()
         # print error message to file with timestamp and Exception
         _fpath = _fpath
-        with open(_fpath, 'a') as f:
-            print(Config.datetime.datetime.now(), '\n' + ('-' * 20), message, file=f)
-            print(str(err), file=f)
-            print(traceback.format_exc(), file=f)
+        with open(_fpath, 'a') as _f:
+            print(Config.datetime.datetime.now(), '\n' + ('-' * 20), message, file=_f)
+            print(str(err), file=_f)
+            print(traceback.format_exc(), file=_f)
 
     def getLogFile(self):
         try:
-            with open ((Config.config_path+"/config.ini"), 'r') as f:
-                    _logsPath=f.readline()
+            with open ((Config.config_path+"/config.ini"), 'r') as _f:
+                    _logsPath = Config.os.path.realpath(
+                                Config.os.path.join(_f.readline(), "logs.txt"))
         except:
             _logsPath=Config.config_path+"/error_logs.txt"
         return(_logsPath)

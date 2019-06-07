@@ -22,12 +22,13 @@ with open(ARP.Browser.Config.getfpath(__file__)+"/AutoRevPie.info", 'r') as f:
     print(" . . . ", f.readline())
 print("\nloading . . . \n")
 
-# Open log file 'logs.txt' for logging
-try:
-    with open(ARP.Browser.ErrorHandler().getLogFile(), 'w') as f:
-        print('Filename:', ARP.Browser.ErrorHandler().getLogFile(), file=f)
-        print('\n - - - Logs (' + str(time.strftime("%Y-%m-%d %H:%M.%S")) + ')' + ' - - - ' + '\n\n', file=f)
-        _loop = False
+try: # write heading to logs file if does not exist already
+    _existingFile = ARP.Browser.Config.os.path.isfile(ARP.Browser.ErrorHandler().getLogFile())
+    if not _existingFile:
+        with open(ARP.Browser.ErrorHandler().getLogFile(), 'a') as f:
+            print('Filename:', ARP.Browser.ErrorHandler().getLogFile(), file=f)
+            print('\n - - - Logs (' + str(time.strftime("%Y-%m-%d %H:%M.%S")) + ')' + ' - - - ' + '\n\n', file=f)
+            _loop = False
 except KeyboardInterrupt:
     print("\n")
     sys.exit(1)
@@ -60,7 +61,7 @@ except Exception as err:
 
 AutoRP_obj = ARP.AutoRevPie(admin, 0, 1)
 RepCounter = AutoRP_obj.RepCount(2)
-CampaignStats = RP_Stats.RevPieStats(3, ARP.Browser.browser)
+CampaignStats = RP_Stats.RevPieStats(3, ARP.Browser)
 
 try:
     # load wallboard
