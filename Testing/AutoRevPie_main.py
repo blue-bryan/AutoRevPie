@@ -7,12 +7,9 @@ Created on Wed May  8 09:41:43 2019
 """
 
 import sys
-import time
-import datetime
 import configparser
 
 import ARP_setup as ARP
-import AutomateRevPie.RevPieStats as RP_Stats
 
 ###############################################################################
 # Program start...
@@ -26,7 +23,7 @@ try: # write heading to logs file if does not exist already
     if not _existingFile:
         with open(ARP.AutomateRP.Browser.ErrorHandler().getLogFile(), 'a') as f:
             print('Filename:', ARP.AutomateRP.Browser.ErrorHandler().getLogFile(), file=f)
-            print('\n - - - Logs (' + str(time.strftime("%Y-%m-%d %H:%M.%S")) + ')' + ' - - - ' + '\n\n', file=f)
+            print('\n - - - Logs (' + str(ARP.AutomateRP.time.strftime("%Y-%m-%d %H:%M.%S")) + ')' + ' - - - ' + '\n\n', file=f)
             _loop = False
 except KeyboardInterrupt:
     print("\n")
@@ -60,7 +57,7 @@ except Exception as err:
 
 AutoRP_obj = ARP.AutomateRP.AutoRevPie(admin, 0, 1)
 RepCounter = ARP.AutomateRP.RepCount(2)
-CampaignStats = RP_Stats.RevPieStats(3, ARP.AutomateRP.Browser)
+CampaignStats = ARP.AutomateRP.RevPieStats(3, ARP.AutomateRP.Browser)
 
 try:
     # load wallboard
@@ -125,10 +122,10 @@ while _loop:
         ARP.AutomateRP.Browser.browser.quit()
         ARP.AutomateRP.Browser.sys.exit(1)
     # update revpieStats on every 5th minute of the hour...
-    if datetime.datetime.now().minute % 5 == 0:
-        _startTime = datetime.datetime.now().minute
+    if ARP.AutomateRP.datetime.datetime.now().minute % 5 == 0:
+        _startTime = ARP.AutomateRP.datetime.datetime.now().minute
         # also update queue order if 10th minute of the hour...
-        if datetime.datetime.now().minute % 10 == 0:
+        if ARP.AutomateRP.datetime.datetime.now().minute % 10 == 0:
             try:
                 ARP.AutomateRP.Browser.ErrorHandler().waiting(1)
                 RepCounter.repCount = RepCounter.getRepsUpdate()
@@ -138,7 +135,7 @@ while _loop:
                 CampaignStats.output_stats()
                 _wait = True
                 while _wait:
-                    if datetime.datetime.now().minute == (_startTime + 1):
+                    if ARP.AutomateRP.datetime.datetime.now().minute == (_startTime + 1):
                         _wait = False
                     ARP.AutomateRP.Browser.ErrorHandler().waiting(1)
                     AutoRP_obj.autoRevPie(RepCounter.repCount)
@@ -156,7 +153,7 @@ while _loop:
                 ARP.AutomateRP.Browser.ErrorHandler().waiting(1)
                 _wait = True
                 while _wait:
-                    if datetime.datetime.now().minute == (_startTime + 1):
+                    if ARP.AutomateRP.datetime.datetime.now().minute == (_startTime + 1):
                         _wait = False
                     ARP.AutomateRP.Browser.ErrorHandler().waiting(1)
                     AutoRP_obj.autoRevPie(RepCounter.repCount)

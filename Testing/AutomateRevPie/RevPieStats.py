@@ -62,7 +62,7 @@ class RevPieStats:
                     self.Browser.expected_conditions.presence_of_element_located(
                             (self.Browser.By.XPATH, "//table[@class='table striped bordered hovered']")))
             self.Browser.ErrorHandler().waiting(1)
-            root = self.Browser.Config.lxml.html.fromstring(self.Browser.browser.page_source)
+            root = self.Browser.lxml.html.fromstring(self.Browser.browser.page_source)
             table = root.xpath("//table[@class='table striped bordered hovered']")[0]
             # iterate over all the rows
             tableValues = []

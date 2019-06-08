@@ -8,6 +8,9 @@
  traffic monitoring and the bidding process for RevPie.
 """
 
+import time
+import datetime
+import lxml.html
 from bs4 import BeautifulSoup
 
 import AutomateRevPie.ARP_WebDriver as Browser
@@ -149,7 +152,7 @@ class AutoRevPie:
                 Browser.browser.execute_script("$.Dialog.close()")
                 Browser.ErrorHandler().printToLog('\n\nBids lowered...\n'
                         , "", Browser.ErrorHandler().getLogFile())
-                self.startTime = Browser.Config.time.time()
+                self.startTime = time.time()
                 self.adjustBids = 1
                 self.campaigns = self.getCampaignStatus()
         elif self.totalCalls > self.maxCallLimit and not self.isPaused:
@@ -169,7 +172,7 @@ class AutoRevPie:
                         , "", Browser.ErrorHandler().getLogFile())
                 self.campaigns = self.getCampaignStatus()
         elif self.totalCalls < 3 and not self.isPaused and self.adjustBids == 1 :
-            _timeDiff = Browser.Config.time.time() - self.startTime
+            _timeDiff = time.time() - self.startTime
             if _timeDiff > (5 * 60):
                 Browser.ErrorHandler().switchToTab(self.bidsPageTab)
                 Browser.browser.execute_script("revPieBidAdjustments("
@@ -182,7 +185,7 @@ class AutoRevPie:
                 Browser.browser.execute_script("$.Dialog.close()")
                 Browser.ErrorHandler().printToLog('\n\nBids raised...\n'
                         , "", Browser.ErrorHandler().getLogFile())
-                self.startTime = Browser.Config.time.time()
+                self.startTime = time.time()
                 self.adjustBids = 0
 
     def switchCampaigns(self, campaignID_1, campaignName_1, campaignID_2, campaignName_2):
@@ -278,17 +281,17 @@ class AutoRevPie:
             Browser.sys.exit(1)
 
         # 8am - 11am
-        if (Browser.Config.datetime.datetime.now().time() > Browser.Config.datetime.datetime.strptime("08:59", "%H:%M").time()
-        and Browser.Config.datetime.datetime.now().time() < Browser.Config.datetime.datetime.strptime("11:00", "%H:%M").time()
-        and Browser.Config.datetime.datetime.today().weekday() < 5):
+        if (datetime.datetime.now().time() > datetime.datetime.strptime("08:59", "%H:%M").time()
+        and datetime.datetime.now().time() < datetime.datetime.strptime("11:00", "%H:%M").time()
+        and datetime.datetime.today().weekday() < 5):
             self.currentCampaign = 0
             if self.campaigns[self.currentCampaign][2]:
                 self.isPaused = True
             elif not self.campaigns[self.currentCampaign][2]:
                 self.isPaused = False
-            if (Browser.Config.datetime.datetime.now().time() > Browser.Config.datetime.datetime.strptime("08:59", "%H:%M").time()
-            and Browser.Config.datetime.datetime.now().time() < Browser.Config.datetime.datetime.strptime("09:01", "%H:%M").time()
-            and Browser.Config.datetime.datetime.today().weekday() < 5):
+            if (datetime.datetime.now().time() > datetime.datetime.strptime("08:59", "%H:%M").time()
+            and datetime.datetime.now().time() < datetime.datetime.strptime("09:01", "%H:%M").time()
+            and datetime.datetime.today().weekday() < 5):
                 if self.isPaused:
                     Browser.ErrorHandler().switchToTab(self.bidsPageTab)
                     Browser.browser.execute_script("changeRevPieCampaignStatus(" + self.campaigns[self.currentCampaign][1] + ", 0)")
@@ -303,17 +306,17 @@ class AutoRevPie:
             self.watchCalls(self.campaigns[self.currentCampaign][1]
                             , self.campaigns[self.currentCampaign][0])
         # 11am - 7pm
-        elif (Browser.Config.datetime.datetime.now().time() > Browser.Config.datetime.datetime.strptime("11:01", "%H:%M").time()
-        and Browser.Config.datetime.datetime.now().time() < Browser.Config.datetime.datetime.strptime("19:00", "%H:%M").time()
-        and Browser.Config.datetime.datetime.today().weekday() < 5):
+        elif (datetime.datetime.now().time() > datetime.datetime.strptime("11:01", "%H:%M").time()
+        and datetime.datetime.now().time() < datetime.datetime.strptime("19:00", "%H:%M").time()
+        and datetime.datetime.today().weekday() < 5):
             self.currentCampaign = 1
             if self.campaigns[self.currentCampaign][2]:
                 self.isPaused = True
             elif not self.campaigns[self.currentCampaign][2]:
                 self.isPaused = False
-            if (Browser.Config.datetime.datetime.now().time() > Browser.Config.datetime.datetime.strptime("11:01", "%H:%M").time()
-            and Browser.Config.datetime.datetime.now().time() < Browser.Config.datetime.datetime.strptime("11:02", "%H:%M").time()
-            and Browser.Config.datetime.datetime.today().weekday() < 5):
+            if (datetime.datetime.now().time() > datetime.datetime.strptime("11:01", "%H:%M").time()
+            and datetime.datetime.now().time() < datetime.datetime.strptime("11:02", "%H:%M").time()
+            and datetime.datetime.today().weekday() < 5):
                 self.switchCampaigns( self.campaigns[self.currentCampaign-1][1]
                                     , self.campaigns[self.currentCampaign-1][0]
                                     , self.campaigns[self.currentCampaign][1]
@@ -329,17 +332,17 @@ class AutoRevPie:
             self.watchCalls(self.campaigns[self.currentCampaign][1]
                             , self.campaigns[self.currentCampaign][0])
         # 7pm - close
-        elif (Browser.Config.datetime.datetime.now().time() > Browser.Config.datetime.datetime.strptime("19:01", "%H:%M").time()
-        and Browser.Config.datetime.datetime.now().time() < Browser.Config.datetime.datetime.strptime("21:00", "%H:%M").time()
-        and Browser.Config.datetime.datetime.today().weekday() < 5):
+        elif (datetime.datetime.now().time() > datetime.datetime.strptime("19:01", "%H:%M").time()
+        and datetime.datetime.now().time() < datetime.datetime.strptime("21:00", "%H:%M").time()
+        and datetime.datetime.today().weekday() < 5):
             self.currentCampaign = 2
             if self.campaigns[self.currentCampaign][2]:
                 self.isPaused = True
             elif not self.campaigns[self.currentCampaign][2]:
                 self.isPaused = False
-            if (Browser.Config.datetime.datetime.now().time() > Browser.Config.datetime.datetime.strptime("19:01", "%H:%M").time()
-            and Browser.Config.datetime.datetime.now().time() < Browser.Config.datetime.datetime.strptime("19:02", "%H:%M").time()
-            and Browser.Config.datetime.datetime.today().weekday() < 5):
+            if (datetime.datetime.now().time() > datetime.datetime.strptime("19:01", "%H:%M").time()
+            and datetime.datetime.now().time() < datetime.datetime.strptime("19:02", "%H:%M").time()
+            and datetime.datetime.today().weekday() < 5):
                 Browser.ErrorHandler().switchToTab(self.bidsPageTab)
                 self.switchCampaigns( self.campaigns[self.currentCampaign-1][1]
                                     , self.campaigns[self.currentCampaign-1][0]
@@ -353,19 +356,19 @@ class AutoRevPie:
                         self.watchCalls(self.campaigns[self.currentCampaign][1]
                                         , self.campaigns[self.currentCampaign][0])
                         Browser.ErrorHandler().waiting(1)
-            elif (Browser.Config.datetime.datetime.now().time() > Browser.Config.datetime.datetime.strptime("20:55", "%H:%M").time()
-            and Browser.Config.datetime.datetime.now().time() < Browser.Config.datetime.datetime.strptime("21:01", "%H:%M").time()
-            and Browser.Config.datetime.datetime.today().weekday() < 5):
+            elif (datetime.datetime.now().time() > datetime.datetime.strptime("20:55", "%H:%M").time()
+            and datetime.datetime.now().time() < datetime.datetime.strptime("21:01", "%H:%M").time()
+            and datetime.datetime.today().weekday() < 5):
                 Browser.browser.execute_script("changeRevPieCampaignStatus(" + self.campaigns[self.currentCampaign][1] + ", 1)")
                 self.campaigns = self.getCampaignStatus()
                 Browser.ErrorHandler().printToLog('\n\n7pm-close Campaign Paused...\n'
                         , "", Browser.ErrorHandler().getLogFile())
                 # wait until next day
-                if Browser.Config.datetime.datetime.today().weekday() == 4:
+                if datetime.datetime.today().weekday() == 4:
                     for i in range(60 * 60 * 24 * 2.5):
                         if i < (60 * 60 * 24 * 2.5):
                             Browser.ErrorHandler().waiting(1)
-                elif Browser.Config.datetime.datetime.today().weekday() < 5:
+                elif datetime.datetime.today().weekday() < 5:
                     for i in range(60 * 60 * 12):
                         if i < (60 * 60 * 12):
                             Browser.ErrorHandler().waiting(1)
@@ -412,7 +415,7 @@ class AutoBidAdjust:
                         (Browser.By.ID,'bidAdjustmentsTable')))
         # get the table
         data = BeautifulSoup(Browser.browser.page_source, "lxml")
-        root = Browser.Config.lxml.html.fromstring(Browser.browser.page_source)
+        root = lxml.html.fromstring(Browser.browser.page_source)
         table = root.xpath("//table[@class='table striped nbm bordered']")[0]
         # iterate over all the rows
         tableValues = []
@@ -539,7 +542,7 @@ class RepCount:
             Browser.WebDriverWait(Browser.browser, 15).until(
                     Browser.expected_conditions.presence_of_element_located(
                             (Browser.By.XPATH, "//table[@class='table striped bordered hovered']")))
-            root = Browser.Config.lxml.html.fromstring(Browser.browser.page_source)
+            root = lxml.html.fromstring(Browser.browser.page_source)
             table =  root.xpath("//table[@class='table striped bordered hovered']")[0]
             # iterate over all the rows   
             for row in table.xpath(".//tr"):
