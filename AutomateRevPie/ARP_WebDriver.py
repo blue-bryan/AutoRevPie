@@ -14,7 +14,6 @@ from selenium.webdriver.support import expected_conditions
 from selenium import webdriver
 from getpass import getpass
 import traceback
-import sys
 
 import AutomateRevPie.config as Config
 
@@ -69,7 +68,7 @@ class ErrorHandler:
         except KeyboardInterrupt as err:
             self.printToLog("\n"
                         , err, self.getLogFile())
-            sys.exit(1)
+            Config.sys.exit(1)
 
     def checkBrowser(self):
         ''' Will call webdriver.title to check if browser is currently open and responding.
@@ -83,7 +82,7 @@ class ErrorHandler:
             try:
                 browser.quit()
             except:pass
-            sys.exit(1)
+            Config.sys.exit(1)
             return(False)
         else:
             return(True)
@@ -107,7 +106,7 @@ def start_browser():
     except Exception as err:
         ErrorHandler().printToLog("\n\nWebDriver: Error on browser setup"
                     , err, ErrorHandler().getLogFile())
-        sys.exit(1)
+        Config.sys.exit(1)
 
 def getLoginInfo(_option):
     ''' - accepted values for _option: '-u' || '-p'
@@ -118,11 +117,11 @@ def getLoginInfo(_option):
             return(u)
         except KeyboardInterrupt:
             print("\n")
-            sys.exit(1)
+            Config.sys.exit(1)
         except Exception as err:
             ErrorHandler().printToLog("\n\nError during user input, closing...\n"
                         , err, ErrorHandler().getLogFile())
-            sys.exit(1)
+            Config.sys.exit(1)
     elif _option == '-p':
         try:
             p = getpass(prompt="  password: ")
@@ -131,11 +130,11 @@ def getLoginInfo(_option):
             return(p)
         except KeyboardInterrupt:
             print("\n")
-            sys.exit(1)
+            Config.sys.exit(1)
         except Exception as err:
             ErrorHandler().printToLog("\n\nError during user input, closing...\n"
                         , err, ErrorHandler().getLogFile())
-            sys.exit(1)
+            Config.sys.exit(1)
 
 def admin_login(_u, _p):
     ''' *
@@ -149,7 +148,7 @@ def admin_login(_u, _p):
         ErrorHandler().printToLog("\nBrowser Error: failed to login to admin, closing..."
                 , err, ErrorHandler().getLogFile())
         ErrorHandler().checkBrowser()
-        sys.exit(1)
+        Config.sys.exit(1)
     else:
         # type credentials
         text_area = browser.find_element_by_css_selector('#UserName')
@@ -179,7 +178,7 @@ def queueDaddy_login(username, password):
         ErrorHandler().printToLog("\nBrowser Error: failed to login to QueueDaddy, closing..."
                 , err, ErrorHandler().getLogFile())
         ErrorHandler().checkBrowser()
-        sys.exit(1)
+        Config.sys.exit(1)
     else:
         text_area = browser.find_element_by_xpath("//input[@name='userName']")
         text_area.send_keys(username)
