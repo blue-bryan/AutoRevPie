@@ -144,4 +144,6 @@ class RevPieStats:
                , self.cost
                , self.revenue ))
             for index in range(len(self.sourceIDs[0])):
-                csvWriter.writerow(_output[index])
+                csvWriter.writerow(
+                        int(round(float(
+                            _output[index].strip('$') ))))

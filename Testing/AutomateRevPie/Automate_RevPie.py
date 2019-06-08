@@ -10,8 +10,7 @@
 
 from bs4 import BeautifulSoup
 
-# get logs file path
-import AutomateRevPie.InitBrowser as Browser
+import ARP_WebDriver as Browser
 
 #                       - AutomateRevPie Module -
 ###############################################################################
@@ -125,45 +124,13 @@ class AutoRevPie:
                             self.campaigns[2][2] = False
             return(self.campaigns)
 
-    def switchCampaigns(self, campaignID_1, campaignName_1, campaignID_2, campaignName_2):
-        ''' -
-            * usage:\n 
-                AutoRevPie.switchCampaigns(AutoRevPie.campaigns[AutoRevPie.currentCampaign-1][1]
-                                         , AutoRevPie.campaigns[AutoRevPie.currentCampaign-1][0]
-                                         , AutoRevPie.campaigns[AutoRevPie.currentCampaign][1]
-                                         , AutoRevPie.campaigns[AutoRevPie.currentCampaign][0])
-        '''
-        BidAdjuster = AutoRevPie.autoBidAdjust()
-        Browser.ErrorHandler().switchToTab(self.bidsPageTab)
-        Browser.browser.execute_script("changeRevPieCampaignStatus(" + campaignID_1 + ", 1)")
-        Browser.ErrorHandler().waiting(1)
-        Browser.browser.execute_script("changeRevPieCampaignStatus(" + campaignID_2 + ", 0)")
-        Browser.ErrorHandler().waiting(2)
-        Browser.browser.execute_script("revPieBidAdjustments("
-                                + campaignID_1 + ", '" + campaignName_1 + "')")
-        Browser.ErrorHandler().waiting(1)
-        Browser.WebDriverWait(Browser.browser, 15).until(
-                Browser.expected_conditions.presence_of_element_located(
-                        (Browser.By.ID,'bidAdjustmentsTable')))
-        Browser.ErrorHandler().waiting(1)
-        Bids = BidAdjuster.copyBids()
-        Browser.ErrorHandler().waiting(1)
-        Browser.browser.execute_script("$.Dialog.close()")
-        Browser.ErrorHandler().waiting(2)
-        Browser.browser.execute_script("revPieBidAdjustments("
-                                + campaignID_2 + ", '" + campaignName_2 + "')")
-        Browser.ErrorHandler().waiting(2)
-        BidAdjuster.changeBids(*Bids, _option='-p')
-        Browser.ErrorHandler().waiting(2)
-        Browser.browser.execute_script("$.Dialog.close()")
-
     def watchCalls(self, campaignID, campaignName):
         ''' Will make adjustments to RevPie campaign status
             and bids based on criteria.
             * Used in AutoRevPie() so current campaign
               can be assigned based on time conditions
         '''
-        BidAdjuster = AutoRevPie.autoBidAdjust()
+        BidAdjuster = AutoBidAdjust()
         if self.campaigns[self.currentCampaign][2]:
             self.isPaused = True
         elif not self.campaigns[self.currentCampaign][2]:
@@ -217,6 +184,38 @@ class AutoRevPie:
                         , "", Browser.ErrorHandler().getLogFile())
                 self.startTime = Browser.Config.time.time()
                 self.adjustBids = 0
+
+    def switchCampaigns(self, campaignID_1, campaignName_1, campaignID_2, campaignName_2):
+        ''' -
+            * usage:\n 
+                AutoRevPie.switchCampaigns(AutoRevPie.campaigns[AutoRevPie.currentCampaign-1][1]
+                                        , AutoRevPie.campaigns[AutoRevPie.currentCampaign-1][0]
+                                        , AutoRevPie.campaigns[AutoRevPie.currentCampaign][1]
+                                        , AutoRevPie.campaigns[AutoRevPie.currentCampaign][0])
+        '''
+        BidAdjuster = AutoBidAdjust()
+        Browser.ErrorHandler().switchToTab(self.bidsPageTab)
+        Browser.browser.execute_script("changeRevPieCampaignStatus(" + campaignID_1 + ", 1)")
+        Browser.ErrorHandler().waiting(1)
+        Browser.browser.execute_script("changeRevPieCampaignStatus(" + campaignID_2 + ", 0)")
+        Browser.ErrorHandler().waiting(2)
+        Browser.browser.execute_script("revPieBidAdjustments("
+                                + campaignID_1 + ", '" + campaignName_1 + "')")
+        Browser.ErrorHandler().waiting(1)
+        Browser.WebDriverWait(Browser.browser, 15).until(
+                Browser.expected_conditions.presence_of_element_located(
+                        (Browser.By.ID,'bidAdjustmentsTable')))
+        Browser.ErrorHandler().waiting(1)
+        Bids = BidAdjuster.copyBids()
+        Browser.ErrorHandler().waiting(1)
+        Browser.browser.execute_script("$.Dialog.close()")
+        Browser.ErrorHandler().waiting(2)
+        Browser.browser.execute_script("revPieBidAdjustments("
+                                + campaignID_2 + ", '" + campaignName_2 + "')")
+        Browser.ErrorHandler().waiting(2)
+        BidAdjuster.changeBids(*Bids, _option='-p')
+        Browser.ErrorHandler().waiting(2)
+        Browser.browser.execute_script("$.Dialog.close()")
 
     def getCalls(self):
         ''' Count calls in queue
@@ -374,132 +373,132 @@ class AutoRevPie:
 
 # ******************************************************************
 
-    class autoBidAdjust:
-        ''' Contains methods to automatically manipulate RevPie bids.\n
-            :Methods:
-            - copyBids() : Will copy current bids and clicks/min for all sources.
-            - changeBids(sourceIDs, clicksPerMin, customBids, _option = None, changeAmount = 0.04, minCPM = 0)
-                :Args:
-                * sourceIDs, clicksPerMin, customBids :
-                    - Each argument takes a list value type.
-                    - Call copyBids() to get current values in a tuple
-                :Optional Args:
-                    * changeAmount=0.4 :
-                        - Set custom bid increment with changeAmount=x
-                    * minCPM=0
-                        - Only SourceIDs with Clicks/Min over the CPM will be changed.
-                    * _option=None
-                        - By default will raise bids by changeAmount
-                    * _option='-l'
-                        - Use to decrease by changeAmount instead.
-                    * _option='-p'
-                        - Use to paste customBids. 
-        '''
-        def __init__(self):
-            self.sourceIDs = []
-            self.clicksPerMin = []
-            self.customBids = []
-
-        def copyBids(self):
-            ''' Will copy current bids and clicks/min for all sources.
-                Requires the Bid Adjustments dialog box to be 
-                opened and on active page.
-                * Returns a tuple of lists: [ self.sourceIDs[0], self.clicksPerMin, self.customBids) ]
-            '''
-            # wait for the table
-            Browser.ErrorHandler().waiting(1)
-            Browser.WebDriverWait(Browser.browser, 15).until(
-                    Browser.expected_conditions.presence_of_element_located(
-                            (Browser.By.ID,'bidAdjustmentsTable')))
-            # get the table
-            data = BeautifulSoup(Browser.browser.page_source, "lxml")
-            root = Browser.Config.lxml.html.fromstring(Browser.browser.page_source)
-            table = root.xpath("//table[@class='table striped nbm bordered']")[0]
-            # iterate over all the rows
-            tableValues = []
-            for td in table.xpath('.//td'):
-                tableValues.append(td.text)
-            self.sourceIDs.append(tableValues[::7])
-            _i = 0
-            try:
-                for index in range(len(tableValues)):
-                    if tableValues[index] == self.sourceIDs[0][_i]:
-                        self.clicksPerMin.append(tableValues[index+3])
-                        _i += 1
-            except:pass
-            for index in range(len(self.sourceIDs[0])):
-                _customBidID = r"customBid_" + str(self.sourceIDs[0][index])
-                try:
-                    output = data.find("input", {"id": _customBidID})['value']
-                    self.customBids.append(output)
-                except:pass
-            return( self.sourceIDs[0]
-                  , self.clicksPerMin
-                  , self.customBids )
-
-        def makeChange(self, __textBox, __newBid, _item):
-            ''' changeBids() helper function.\n
-                Will make custom bid adjustment (__newBid) to SourceID:_item
-                * __textBox is webdriver element
-            '''
-            __textBox.send_keys(Browser.Keys.CONTROL, 'a')
-            __textBox.send_keys(str(__newBid))
-            Browser.ErrorHandler().waiting(1)
-            Browser.browser.execute_script("makeCustomBidAdjustment('" + str(_item) + "')")
-
-        def changeBids(self, sourceIDs, clicksPerMin, customBids, _option = None, changeAmount = 0.04, minCPM = 0):
-            ''' :Args:
-                * sourceIDs, clicksPerMin, customBids :
-                    - Each argument takes a list value type.
-                    - Call copyBids() to get current values in a tuple
-                :Optional Args:\n
+class AutoBidAdjust:
+    ''' Contains methods to automatically manipulate RevPie bids.\n
+        :Methods:
+        - copyBids() : Will copy current bids and clicks/min for all sources.
+        - changeBids(sourceIDs, clicksPerMin, customBids, _option = None, changeAmount = 0.04, minCPM = 0)
+            :Args:
+            * sourceIDs, clicksPerMin, customBids :
+                - Each argument takes a list value type.
+                - Call copyBids() to get current values in a tuple
+            :Optional Args:
                 * changeAmount=0.4 :
                     - Set custom bid increment with changeAmount=x
                 * minCPM=0
-                    - Only SourceIDs with Clicks/Min greater than the CPM will be changed.
+                    - Only SourceIDs with Clicks/Min over the CPM will be changed.
                 * _option=None
                     - By default will raise bids by changeAmount
                 * _option='-l'
                     - Use to decrease by changeAmount instead.
                 * _option='-p'
-                    - Use to paste customBids.
-            '''
-            if _option == '-p': # change date filter to All if pasting bids
-                Browser.browser.execute_script("changeBidAdjustmentsDateFilter('all')")
-                Browser.ErrorHandler().waiting(2)
-                _loop = True
-                while _loop:
-                    if (str(Browser.browser.find_element_by_id(
-                            'bidAdjustmentsDateFilter').get_attribute(
-                                    "value")) == "all"):
-                        _loop = False
-                    else:
-                        Browser.ErrorHandler().checkBrowser()
-                Browser.ErrorHandler().waiting(2)
-                Browser.WebDriverWait(Browser.browser, 15).until(
-                        Browser.expected_conditions.presence_of_element_located(
-                                (Browser.By.ID, 'bidAdjustmentsTable')))
-            # iterate through sourceIDs
-            for index, item in enumerate(sourceIDs):
-                _customBidID = r"customBid_" + str(item)
-                try:
-                    _textBox = Browser.browser.find_element_by_id(_customBidID)
-                except:pass # will pass if the sourceID is not available
-                else:
-                    if _option == '-p': # paste bids
-                        _newBid = float(customBids[index])
-                        self.makeChange(_textBox, _newBid, item)
-                    elif _option == '-l': # lower bids
-                        # if lowering bids check Clicks/min
-                        if self.clicksPerMin[index] is not None:
-                            if float(self.clicksPerMin[index]) > minCPM:
-                                _newBid = float(customBids[index]) - changeAmount
-                                self.makeChange(_textBox, _newBid, item)
-                    elif _option is None: # default will raise bids
-                        _newBid = float(customBids[index]) + changeAmount
-                        self.makeChange(_textBox, _newBid, item)
+                    - Use to paste customBids. 
+    '''
+    def __init__(self):
+        self.sourceIDs = []
+        self.clicksPerMin = []
+        self.customBids = []
 
-####################################################################
+    def copyBids(self):
+        ''' Will copy current bids and clicks/min for all sources.
+            Requires the Bid Adjustments dialog box to be 
+            opened and on active page.
+            * Returns a tuple of lists: [ self.sourceIDs[0], self.clicksPerMin, self.customBids) ]
+        '''
+        # wait for the table
+        Browser.ErrorHandler().waiting(1)
+        Browser.WebDriverWait(Browser.browser, 15).until(
+                Browser.expected_conditions.presence_of_element_located(
+                        (Browser.By.ID,'bidAdjustmentsTable')))
+        # get the table
+        data = BeautifulSoup(Browser.browser.page_source, "lxml")
+        root = Browser.Config.lxml.html.fromstring(Browser.browser.page_source)
+        table = root.xpath("//table[@class='table striped nbm bordered']")[0]
+        # iterate over all the rows
+        tableValues = []
+        for td in table.xpath('.//td'):
+            tableValues.append(td.text)
+        self.sourceIDs.append(tableValues[::7])
+        _i = 0
+        try:
+            for index in range(len(tableValues)):
+                if tableValues[index] == self.sourceIDs[0][_i]:
+                    self.clicksPerMin.append(tableValues[index+3])
+                    _i += 1
+        except:pass
+        for index in range(len(self.sourceIDs[0])):
+            _customBidID = r"customBid_" + str(self.sourceIDs[0][index])
+            try:
+                output = data.find("input", {"id": _customBidID})['value']
+                self.customBids.append(output)
+            except:pass
+        return( self.sourceIDs[0]
+                , self.clicksPerMin
+                , self.customBids )
+
+    def makeChange(self, __textBox, __newBid, _item):
+        ''' changeBids() helper function.\n
+            Will make custom bid adjustment (__newBid) to SourceID:_item
+            * __textBox is webdriver element
+        '''
+        __textBox.send_keys(Browser.Keys.CONTROL, 'a')
+        __textBox.send_keys(str(__newBid))
+        Browser.ErrorHandler().waiting(1)
+        Browser.browser.execute_script("makeCustomBidAdjustment('" + str(_item) + "')")
+
+    def changeBids(self, sourceIDs, clicksPerMin, customBids, _option = None, changeAmount = 0.04, minCPM = 0):
+        ''' :Args:
+            * sourceIDs, clicksPerMin, customBids :
+                - Each argument takes a list value type.
+                - Call copyBids() to get current values in a tuple
+            :Optional Args:\n
+            * changeAmount=0.4 :
+                - Set custom bid increment with changeAmount=x
+            * minCPM=0
+                - Only SourceIDs with Clicks/Min greater than the CPM will be changed.
+            * _option=None
+                - By default will raise bids by changeAmount
+            * _option='-l'
+                - Use to decrease by changeAmount instead.
+            * _option='-p'
+                - Use to paste customBids.
+        '''
+        if _option == '-p': # change date filter to All if pasting bids
+            Browser.browser.execute_script("changeBidAdjustmentsDateFilter('all')")
+            Browser.ErrorHandler().waiting(2)
+            _loop = True
+            while _loop:
+                if (str(Browser.browser.find_element_by_id(
+                        'bidAdjustmentsDateFilter').get_attribute(
+                                "value")) == "all"):
+                    _loop = False
+                else:
+                    Browser.ErrorHandler().checkBrowser()
+            Browser.ErrorHandler().waiting(2)
+            Browser.WebDriverWait(Browser.browser, 15).until(
+                    Browser.expected_conditions.presence_of_element_located(
+                            (Browser.By.ID, 'bidAdjustmentsTable')))
+        # iterate through sourceIDs
+        for index, item in enumerate(sourceIDs):
+            _customBidID = r"customBid_" + str(item)
+            try:
+                _textBox = Browser.browser.find_element_by_id(_customBidID)
+            except:pass # will pass if the sourceID is not available
+            else:
+                if _option == '-p': # paste bids
+                    _newBid = float(customBids[index])
+                    self.makeChange(_textBox, _newBid, item)
+                elif _option == '-l': # lower bids
+                    # if lowering bids check Clicks/min
+                    if self.clicksPerMin[index] is not None:
+                        if float(self.clicksPerMin[index]) > minCPM:
+                            _newBid = float(customBids[index]) - changeAmount
+                            self.makeChange(_textBox, _newBid, item)
+                elif _option is None: # default will raise bids
+                    _newBid = float(customBids[index]) + changeAmount
+                    self.makeChange(_textBox, _newBid, item)
+
+# ******************************************************************
 
 class RepCount:
     ''' Will open QueueOrder page,
