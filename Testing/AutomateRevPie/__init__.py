@@ -1,3 +1,3 @@
 from AutomateRevPie.config import *
-from AutomateRevPie.InitBrowser import *
+from AutomateRevPie.ARP_WebDriver import *
 from AutomateRevPie.Automate_RevPie import *

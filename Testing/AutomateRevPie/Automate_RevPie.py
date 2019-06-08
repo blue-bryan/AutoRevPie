@@ -10,7 +10,7 @@
 
 from bs4 import BeautifulSoup
 
-import ARP_WebDriver as Browser
+import AutomateRevPie.ARP_WebDriver as Browser
 
 #                       - AutomateRevPie Module -
 ###############################################################################
