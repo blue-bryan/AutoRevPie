@@ -6,7 +6,6 @@ Created on Wed May  8 09:41:43 2019
 @author: bryan
 """
 
-import sys
 import configparser
 
 import ARP_setup as ARP
@@ -27,7 +26,7 @@ try: # write heading to logs file if does not exist already
             _loop = False
 except KeyboardInterrupt:
     print("\n")
-    sys.exit(1)
+    ARP.AutomateRP.Browser.Config.sys.exit(1)
 except Exception:pass
 
 ################################ CONFIG #######################################
@@ -47,11 +46,11 @@ try:
     queue_pass = r"{}".format(configParser.get('login-info', 'password'))
 except KeyboardInterrupt:
     print("\n")
-    sys.exit(1)
+    ARP.AutomateRP.Browser.Config.sys.exit(1)
 except Exception as err:
     ARP.AutomateRP.Browser.ErrorHandler().printToLog("\n\nconfigParser: Error while reading config file 'config.txt', closing..."
                 , err, ARP.AutomateRP.Browser.ErrorHandler().getLogFile())
-    sys.exit(1)
+    ARP.AutomateRP.Browser.Config.sys.exit(1)
 
 ############################# browser setup ###################################
 
@@ -77,7 +76,7 @@ try:
             ARP.AutomateRP.Browser.admin_login(ARP.AutomateRP.Browser.getLoginInfo('-u'), ARP.AutomateRP.Browser.getLoginInfo('-p'))
         except KeyboardInterrupt:
             print("\n")
-            sys.exit(1)
+            ARP.AutomateRP.Browser.Config.sys.exit(1)
         except Exception as err:
             ARP.AutomateRP.Browser.ErrorHandler().printToLog("\nError: Incorrect Username/Password, try again...\n"
                         , err, ARP.AutomateRP.Browser.ErrorHandler().getLogFile())
@@ -98,16 +97,15 @@ try:
     ARP.AutomateRP.Browser.ErrorHandler().waiting(1)
 except KeyboardInterrupt:
     print("\n")
-    sys.exit(1)
+    ARP.AutomateRP.Browser.Config.sys.exit(1)
 except Exception as err:
     ARP.AutomateRP.Browser.ErrorHandler().printToLog("\n\nError while loading tabs, closing...\n"
                 , err, ARP.AutomateRP.Browser.ErrorHandler().getLogFile())
     ARP.AutomateRP.Browser.browser.quit()
-    ARP.AutomateRP.Browser.sys.exit(1)
+    ARP.AutomateRP.Browser.Config.sys.exit(1)
 
 ############################### - MAIN - ######################################
 
-AutoRP_obj.printIsPaused()
 _loop = True
 while _loop:
     _loop = ARP.AutomateRP.Browser.ErrorHandler().checkBrowser()
@@ -115,12 +113,12 @@ while _loop:
         AutoRP_obj.autoRevPie(RepCounter.repCount)
     except KeyboardInterrupt:
         print("\n")
-        sys.exit(1)
+        ARP.AutomateRP.Browser.Config.sys.exit(1)
     except Exception as err:
         ARP.AutomateRP.Browser.ErrorHandler().printToLog("\n\nError: error while executing AutoRevPie, closing...\n"
                     , err, ARP.AutomateRP.Browser.ErrorHandler().getLogFile())
         ARP.AutomateRP.Browser.browser.quit()
-        ARP.AutomateRP.Browser.sys.exit(1)
+        ARP.AutomateRP.Browser.Config.sys.exit(1)
     # update revpieStats on every 5th minute of the hour...
     if ARP.AutomateRP.datetime.datetime.now().minute % 5 == 0:
         _startTime = ARP.AutomateRP.datetime.datetime.now().minute
@@ -141,9 +139,9 @@ while _loop:
                     AutoRP_obj.autoRevPie(RepCounter.repCount)
             except KeyboardInterrupt:
                 print("\n")
-                sys.exit(1)
+                ARP.AutomateRP.Browser.Config.sys.exit(1)
             except Exception as err:
-                ARP.AutomateRP.Browser.ErrorHandler().printToLog("\n\nError: unable to update rep count..."
+                ARP.AutomateRP.Browser.ErrorHandler().printToLog("\n\nError while updating stats..."
                 , err, ARP.AutomateRP.Browser.ErrorHandler().getLogFile())
         else: # else just get revpieStats
             try:
@@ -159,7 +157,7 @@ while _loop:
                     AutoRP_obj.autoRevPie(RepCounter.repCount)
             except KeyboardInterrupt:
                 print("\n")
-                sys.exit(1)
+                ARP.AutomateRP.Browser.Config.sys.exit(1)
             except Exception as err:
                 ARP.AutomateRP.Browser.ErrorHandler().printToLog("\n\nError: unable to update revpieStats..."
                 , err, ARP.AutomateRP.Browser.ErrorHandler().getLogFile())
