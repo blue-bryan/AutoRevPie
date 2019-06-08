@@ -1,5 +1,5 @@
 import os
-import lxml.html
+import sys
 import time
 import datetime
 

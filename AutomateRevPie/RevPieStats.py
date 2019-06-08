@@ -16,7 +16,7 @@ class RevPieStats:
     def __init__(self, _revpieStatsTab, _Browser):
         self.Browser = _Browser
         self.revpieStatsTab = _revpieStatsTab
-        self.currentCampaign = 0
+        self._currentCampaign = 0
         self.tableHeaders = []
         self.sourceIDs = []
         self.clicks = []
@@ -24,24 +24,24 @@ class RevPieStats:
         self.cost = []
         self.revenue = []
 
-    def getStatsPage(self, currentCampaign, campaignName):
+    def getStatsPage(self, __currentCampaign, campaignName):
         ''' Will load Campaign Performance Report for the current campaign
         '''
         try:
             self.Browser.ErrorHandler().switchToTab(self.revpieStatsTab)
             self.Browser.browser.execute_script("window.location = '/Affiliates/RevPieCampaignPerformance'")
             self.Browser.ErrorHandler().waiting(1)
-            self.Browser.WebDriverWait(self.Browser.browser, 60).until(
+            self.Browser.WebDriverWait(self.Browser.browser, 15).until(
                     self.Browser.expected_conditions.presence_of_element_located(
                             (self.Browser.By.NAME, "CampaignId")))
-            self.currentCampaign = currentCampaign
-            if self.currentCampaign == 0:
+            self._currentCampaign = __currentCampaign
+            if self._currentCampaign == 0:
                 self.Browser.browser.find_element_by_xpath(
                         "//select[@name='CampaignId']/option[text()='" + campaignName + "']").click()
-            if self.currentCampaign == 1:
+            if self._currentCampaign == 1:
                 self.Browser.browser.find_element_by_xpath(
                         "//select[@name='CampaignId']/option[text()='" + campaignName + "']").click()
-            if self.currentCampaign == 2:
+            if self._currentCampaign == 2:
                 self.Browser.browser.find_element_by_xpath(
                         "//select[@name='CampaignId']/option[text()='" + campaignName + "']").click()
             self.Browser.browser.find_element_by_name('GetReport').click()
@@ -58,11 +58,11 @@ class RevPieStats:
             * Returns a tuple of arrays.
         '''
         try:
-            self.Browser.WebDriverWait(self.Browser.browser, 30).until(
+            self.Browser.WebDriverWait(self.Browser.browser, 15).until(
                     self.Browser.expected_conditions.presence_of_element_located(
                             (self.Browser.By.XPATH, "//table[@class='table striped bordered hovered']")))
             self.Browser.ErrorHandler().waiting(1)
-            root = self.Browser.Config.lxml.html.fromstring(self.Browser.browser.page_source)
+            root = self.Browser.lxml.html.fromstring(self.Browser.browser.page_source)
             table = root.xpath("//table[@class='table striped bordered hovered']")[0]
             # iterate over all the rows
             tableValues = []
@@ -99,14 +99,14 @@ class RevPieStats:
                     , err, self.Browser.ErrorHandler().getLogFile())
             self.Browser.ErrorHandler().checkBrowser()
 
-    def getStatsUpdate(self, currentCampaign, campaignName):
+    def getStatsUpdate(self, __currentCampaign, campaignName):
         ''' Will check if currentCampaign has changed,
             then will call getStatsTable() to get updated values.
             * Returns a tuple of arrays, each metric is a separate array.
         '''
-        if currentCampaign != self.currentCampaign:
-            self.getStatsPage(currentCampaign, campaignName)
-            self.currentCampaign = currentCampaign
+        if __currentCampaign != self._currentCampaign:
+            self.getStatsPage(__currentCampaign, campaignName)
+            self._currentCampaign = __currentCampaign
             tableValues = self.getStatsTable()
             return(tableValues)
         else:
@@ -144,4 +144,6 @@ class RevPieStats:
                , self.cost
                , self.revenue ))
             for index in range(len(self.sourceIDs[0])):
-                csvWriter.writerow(_output[index])
+                csvWriter.writerow(
+                        int(round(float(
+                            _output[index].strip('$') ))))
