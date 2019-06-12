@@ -6,7 +6,6 @@
 """
 
 import csv
-import re
 
 class RPStats:
     ''' Will parse Campaign Performance Report to 
@@ -35,13 +34,13 @@ class RPStats:
                     self.Browser.expected_conditions.presence_of_element_located(
                             (self.Browser.By.NAME, "CampaignId")))
             self._currentCampaign = __currentCampaign
-            if self._currentCampaign == 0:
+            if __currentCampaign == 0:
                 self.Browser.browser.find_element_by_xpath(
                         "//select[@name='CampaignId']/option[text()='" + campaignName + "']").click()
-            elif self._currentCampaign == 1:
+            elif __currentCampaign == 1:
                 self.Browser.browser.find_element_by_xpath(
                         "//select[@name='CampaignId']/option[text()='" + campaignName + "']").click()
-            elif self._currentCampaign == 2:
+            elif __currentCampaign == 2:
                 self.Browser.browser.find_element_by_xpath(
                         "//select[@name='CampaignId']/option[text()='" + campaignName + "']").click()
             self.Browser.browser.find_element_by_name('GetReport').click()
@@ -77,12 +76,12 @@ class RPStats:
             self.sourceIDs.append(tableValues[::10])
             _i = 0
             try:
-                for index in range(len(tableValues)):
-                    if tableValues[index] == self.sourceIDs[0][_i]:
-                        self.clicks.append(tableValues[index+1])
-                        self.appCount.append(tableValues[index+2])
-                        self.cost.append(tableValues[index+3])
-                        self.revenue.append(tableValues[index+4])
+                for _index in range(len(tableValues)):
+                    if tableValues[_index] == self.sourceIDs[0][_i]:
+                        self.clicks.append(tableValues[_index+1])
+                        self.appCount.append(tableValues[_index+2])
+                        self.cost.append(tableValues[_index+3].strip('$'))
+                        self.revenue.append(tableValues[_index+4].strip('$'))
                         _i += 1
             except:pass
             return( self.tableHeaders
@@ -105,8 +104,8 @@ class RPStats:
             * Returns a tuple of arrays, each metric is a separate array.
         '''
         if __currentCampaign != self._currentCampaign:
-            self.getStatsPage(__currentCampaign, campaignName)
             self._currentCampaign = __currentCampaign
+            self.getStatsPage(__currentCampaign, campaignName)
             tableValues = self.getStatsTable()
             return(tableValues)
         else:
@@ -118,10 +117,10 @@ class RPStats:
                         self.Browser.expected_conditions.alert_is_present())
                 alert = self.Browser.browser.switch_to.alert
                 alert.accept() # accept form resubmit
+                tableValues = self.getStatsTable()
             except self.Browser.TimeoutException as err:
                 self.Browser.ErrorHandler().printToLog("\n\ngetRepsUpdate(): timeout exception\n"
                         , err, self.Browser.ErrorHandler().getLogFile())
-            tableValues = self.getStatsTable()
             return(tableValues)
 
     def output_stats(self, _mode = None):
@@ -138,15 +137,9 @@ class RPStats:
             csvWriter = csv.writer(_csvfile, delimiter=",")
             if _mode == "-headers":
                 csvWriter.writerow(self.tableHeaders[:5])
-            _output = list(zip( self.sourceIDs[0]
-               , self.clicks
-               , self.appCount
-               , self.cost
-               , self.revenue ))
-            for index in range(len(self.sourceIDs[0])):
-                for _index in range(len(_output[index])):
-                    try:
-                        csvWriter.writerow(
-                                int(round(float(
-                                    str(_output[index][_index]).strip('$') ))))
-                    except:pass
+            for _index in range(len(self.sourceIDs[0])):
+                csvWriter.writerow( [ self.sourceIDs[0][_index]
+                                    , self.clicks[_index]
+                                    , self.appCount[_index]
+                                    , self.cost[_index]
+                                    , self.revenue[_index]] )

@@ -188,9 +188,9 @@ class AutoRevPie:
         '''
         BidAdjuster = AutoBidAdjust()
         Browser.ErrorHandler().switchToTab(self.bidsPageTab)
-        #Browser.browser.execute_script("changeRevPieCampaignStatus(" + campaignID_1 + ", 1)")
+        Browser.browser.execute_script("changeRevPieCampaignStatus(" + campaignID_1 + ", 1)")
         Browser.ErrorHandler().waiting(1)
-        #Browser.browser.execute_script("changeRevPieCampaignStatus(" + campaignID_2 + ", 0)")
+        Browser.browser.execute_script("changeRevPieCampaignStatus(" + campaignID_2 + ", 0)")
         Browser.ErrorHandler().waiting(2)
         Browser.browser.execute_script("revPieBidAdjustments("
                                 + campaignID_1 + ", '" + campaignName_1 + "')")
