@@ -8,8 +8,6 @@
  traffic monitoring and the bidding process for RevPie.
 """
 
-from decimal import Decimal
-
 import AutomateRevPie.ARP_WebDriver as Browser
 
 #                       - AutomateRevPie Module -
