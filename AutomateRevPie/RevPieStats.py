@@ -8,7 +8,7 @@
 import csv
 import re
 
-class RevPieStats:
+class RPStats:
     ''' Will parse Campaign Performance Report to 
         get performance statistics for sources.
         - metrics: sourceID, clicks, applications, cost, revenue
@@ -16,7 +16,7 @@ class RevPieStats:
     def __init__(self, _revpieStatsTab, _Browser):
         self.Browser = _Browser
         self.revpieStatsTab = _revpieStatsTab
-        self._currentCampaign = 0
+        self._currentCampaign = None
         self.tableHeaders = []
         self.sourceIDs = []
         self.clicks = []
@@ -38,16 +38,16 @@ class RevPieStats:
             if self._currentCampaign == 0:
                 self.Browser.browser.find_element_by_xpath(
                         "//select[@name='CampaignId']/option[text()='" + campaignName + "']").click()
-            if self._currentCampaign == 1:
+            elif self._currentCampaign == 1:
                 self.Browser.browser.find_element_by_xpath(
                         "//select[@name='CampaignId']/option[text()='" + campaignName + "']").click()
-            if self._currentCampaign == 2:
+            elif self._currentCampaign == 2:
                 self.Browser.browser.find_element_by_xpath(
                         "//select[@name='CampaignId']/option[text()='" + campaignName + "']").click()
             self.Browser.browser.find_element_by_name('GetReport').click()
         except KeyboardInterrupt as err:
             print("\n", err)
-            self.Browser.sys.exit(1)
+            self.Browser.Config.sys.exit(1)
         except Exception as err:
             self.Browser.ErrorHandler().printToLog("\ngetStatsPage() error: failed to get campaign performance stats\n"
                     , err, self.Browser.ErrorHandler().getLogFile())
@@ -93,7 +93,7 @@ class RevPieStats:
                     , self.revenue )
         except KeyboardInterrupt as err:
             print("\n", err)
-            self.Browser.sys.exit(1)
+            self.Browser.Config.sys.exit(1)
         except Exception as err:
             self.Browser.ErrorHandler().printToLog("\n\ngetStatsTable(): error while loading table, check logs\n"
                     , err, self.Browser.ErrorHandler().getLogFile())
@@ -144,6 +144,9 @@ class RevPieStats:
                , self.cost
                , self.revenue ))
             for index in range(len(self.sourceIDs[0])):
-                csvWriter.writerow(
-                        int(round(float(
-                            _output[index].strip('$') ))))
+                for _index in range(len(_output[index])):
+                    try:
+                        csvWriter.writerow(
+                                int(round(float(
+                                    str(_output[index][_index]).strip('$') ))))
+                    except:pass
