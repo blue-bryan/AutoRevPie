@@ -5,15 +5,18 @@
 -@author: bryan
 """
 
+from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support import expected_conditions
-from selenium import webdriver
 from getpass import getpass
 import traceback
+
+import bs4
+import lxml.html
 
 import AutomateRevPie.config as Config
 

@@ -8,8 +8,7 @@
  traffic monitoring and the bidding process for RevPie.
 """
 
-import lxml.html
-from bs4 import BeautifulSoup
+from decimal import Decimal
 
 import AutomateRevPie.ARP_WebDriver as Browser
 
@@ -31,7 +30,7 @@ class AutoRevPie:
         self.adjustBids_CallLimit  = 8 # default callLimit == 8
         self.repsToCallsRatio = 0.25 # ratio to use for callLimit...
                                      # x% of Reps in Queue = callLimit
-        self.maxCallLimit = 11 # limit of number of calls before pausing campaign
+        self.maxCallLimit = 10 # limit of number of calls before pausing campaign
         self.adjustBids = 0
         self.totalCalls = 0
         self.currentCampaign = 0
@@ -40,16 +39,6 @@ class AutoRevPie:
                          , ["RP_102_11am to 7pm", "396", True]
                          , ["RP_103_7pmClose", "391", True]
                          , ["Closed", "0", True] ]
-
-    def printIsPaused(self):
-        ''' *
-        '''
-        if self.isPaused:
-            print('\nCampaign is currently: Paused\n\n')
-            return(self.isPaused)
-        else:
-            print('\nCampaign is currently: Active\n')
-            return(self.isPaused)
 
     def openBidAdjustments(self):
         ''' *
@@ -92,9 +81,15 @@ class AutoRevPie:
         else:
             Browser.browser.execute_script("$('#RevPieCampaigns').click()")
             try:
-                Browser.WebDriverWait(Browser.browser, 15).until(
-                        Browser.expected_conditions.presence_of_element_located(
-                                (Browser.By.ID, "revPieCampaignsDiv")))
+                Browser.ErrorHandler().waiting(1)
+                _loop = True
+                while _loop:
+                    if (str(Browser.browser.find_element_by_id(
+                            'ajax-loading').get_attribute(
+                                    "style")) == "display: none;"):
+                        _loop = False
+                    else:
+                        Browser.ErrorHandler().checkBrowser()
             except Exception as err:
                 Browser.ErrorHandler().printToLog("\n\ngetCampaignStatus: error, cannot find 'revPieCampaignsDiv'\n"
                         , err, Browser.ErrorHandler().getLogFile())
@@ -307,7 +302,7 @@ class AutoRevPie:
                 self.switchCampaigns( self.campaigns[self.currentCampaign-1][1]
                                     , self.campaigns[self.currentCampaign-1][0]
                                     , self.campaigns[self.currentCampaign][1]
-                                    , self.campaigns[self.currentCampaign][0])
+                                    , self.campaigns[self.currentCampaign][0] )
                 Browser.ErrorHandler().printToLog('\n\nSwitched to 11am campaign...\n'
                         , "", Browser.ErrorHandler().getLogFile())
                 # wait until 11:02
@@ -331,7 +326,7 @@ class AutoRevPie:
                 self.switchCampaigns( self.campaigns[self.currentCampaign-1][1]
                                     , self.campaigns[self.currentCampaign-1][0]
                                     , self.campaigns[self.currentCampaign][1]
-                                    , self.campaigns[self.currentCampaign][0])
+                                    , self.campaigns[self.currentCampaign][0] )
                 Browser.ErrorHandler().printToLog('\n\nSwitched to 7pm campaign...\n'
                         , "", Browser.ErrorHandler().getLogFile())
                 # wait until 19:02
@@ -401,8 +396,8 @@ class AutoBidAdjust:
                 Browser.expected_conditions.presence_of_element_located(
                         (Browser.By.ID,'bidAdjustmentsTable')))
         # get the table
-        data = BeautifulSoup(Browser.browser.page_source, "lxml")
-        root = lxml.html.fromstring(Browser.browser.page_source)
+        data = Browser.bs4.BeautifulSoup(Browser.browser.page_source, "lxml")
+        root = Browser.lxml.html.fromstring(Browser.browser.page_source)
         table = root.xpath("//table[@class='table striped nbm bordered']")[0]
         # iterate over all the rows
         tableValues = []
@@ -413,28 +408,31 @@ class AutoBidAdjust:
         try:
             for index in range(len(tableValues)):
                 if tableValues[index] == self.sourceIDs[0][_i]:
-                    self.clicksPerMin.append(tableValues[index+3])
+                    if tableValues[index+3] is not None:
+                        float(self.clicksPerMin.append(tableValues[index+3]))
+                    else:
+                        self.clicksPerMin.append(0)
                     _i += 1
         except:pass
         for index in range(len(self.sourceIDs[0])):
             _customBidID = r"customBid_" + str(self.sourceIDs[0][index])
             try:
                 output = data.find("input", {"id": _customBidID})['value']
-                self.customBids.append(output)
+                self.customBids.append(float(output))
             except:pass
         return( self.sourceIDs[0]
                 , self.clicksPerMin
                 , self.customBids )
 
-    def makeChange(self, __textBox, __newBid, _item):
+    def makeChange(self, __textBox, __newBid, _sourceID):
         ''' changeBids() helper function.\n
-            Will make custom bid adjustment (__newBid) to SourceID:_item
+            Will make custom bid adjustment (__newBid) to _sourceID
             * __textBox is webdriver element
         '''
         __textBox.send_keys(Browser.Keys.CONTROL, 'a')
         __textBox.send_keys(str(__newBid))
         Browser.ErrorHandler().waiting(1)
-        Browser.browser.execute_script("makeCustomBidAdjustment('" + str(_item) + "')")
+        Browser.browser.execute_script("makeCustomBidAdjustment('" + str(_sourceID) + "')")
 
     def changeBids(self, sourceIDs, clicksPerMin, customBids, _option = None, changeAmount = 0.04, minCPM = 0):
         ''' :Args:
@@ -459,8 +457,8 @@ class AutoBidAdjust:
             _loop = True
             while _loop:
                 if (str(Browser.browser.find_element_by_id(
-                        'bidAdjustmentsDateFilter').get_attribute(
-                                "value")) == "all"):
+                        'ajax-loading').get_attribute(
+                                "style")) == "display: none;"):
                     _loop = False
                 else:
                     Browser.ErrorHandler().checkBrowser()
@@ -469,24 +467,25 @@ class AutoBidAdjust:
                     Browser.expected_conditions.presence_of_element_located(
                             (Browser.By.ID, 'bidAdjustmentsTable')))
         # iterate through sourceIDs
-        for index, item in enumerate(sourceIDs):
-            _customBidID = r"customBid_" + str(item)
+        for _index, _item in enumerate(sourceIDs):
+            _elementID = r"customBid_" + str(_item)
             try:
-                _textBox = Browser.browser.find_element_by_id(_customBidID)
+                _textBox = Browser.browser.find_element_by_id(_elementID)
             except:pass # will pass if the sourceID is not available
-            else:
-                if _option == '-p': # paste bids
-                    _newBid = float(customBids[index])
-                    self.makeChange(_textBox, _newBid, item)
-                elif _option == '-l': # lower bids
-                    # if lowering bids check Clicks/min
-                    if self.clicksPerMin[index] is not None:
-                        if float(self.clicksPerMin[index]) > minCPM:
-                            _newBid = float(customBids[index]) - changeAmount
-                            self.makeChange(_textBox, _newBid, item)
-                elif _option is None: # default will raise bids
-                    _newBid = float(customBids[index]) + changeAmount
-                    self.makeChange(_textBox, _newBid, item)
+            finally:
+                if _option is None: # default will raise bids
+                    _newBid = customBids[_index] + changeAmount
+                    self.makeChange(_textBox, _newBid, sourceIDs[_index])
+                elif _option == '-p': # paste bids
+                    _newBid = customBids[_index]
+                    self.makeChange(_textBox, _newBid, sourceIDs[_index])
+        if _option == '-l': # lower bids
+            # if lowering bids check Clicks/min
+            _index = clicksPerMin.index(max(clicksPerMin))
+            _elementID = r"customBid_" + str(sourceIDs[_index])
+            _textBox = Browser.browser.find_element_by_id(_elementID)
+            _newBid = customBids[_index] - changeAmount
+            self.makeChange(_textBox, _newBid, sourceIDs[_index])
 
 # ******************************************************************
 
@@ -529,7 +528,7 @@ class RepCount:
             Browser.WebDriverWait(Browser.browser, 15).until(
                     Browser.expected_conditions.presence_of_element_located(
                             (Browser.By.XPATH, "//table[@class='table striped bordered hovered']")))
-            root = lxml.html.fromstring(Browser.browser.page_source)
+            root = Browser.lxml.html.fromstring(Browser.browser.page_source)
             table =  root.xpath("//table[@class='table striped bordered hovered']")[0]
             # iterate over all the rows   
             for row in table.xpath(".//tr"):
