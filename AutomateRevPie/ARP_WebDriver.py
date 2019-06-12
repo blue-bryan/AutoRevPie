@@ -12,11 +12,12 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support import expected_conditions
-from getpass import getpass
+
+import getpass
 import traceback
 
-import bs4
 import lxml.html
+import bs4
 
 import AutomateRevPie.config as Config
 
@@ -127,7 +128,7 @@ def getLoginInfo(_option):
             Config.sys.exit(1)
     elif _option == '-p':
         try:
-            p = getpass(prompt="  password: ")
+            p = getpass.getpass(prompt="  password: ")
             # admin_pass = input("  password: ")
             print("\n . . . \n")
             return(p)
