@@ -102,19 +102,19 @@ class AutoRevPie:
                 for i in table.find_elements_by_tag_name('span'):
                     tableValues.append(i.text) 
                 # iterate over all the rows
-                for index, item in enumerate(tableValues):
-                    if item == "RP101_8am_to_11am":
-                        if tableValues[index+2] == "paused":
+                for _index, _item in enumerate(tableValues):
+                    if _item == "RP101_8am_to_11am":
+                        if tableValues[_index+2] == "paused":
                             self.campaigns[0][2] = True
                         else:
                             self.campaigns[0][2] = False
-                    elif item == "RP_102_11am to 7pm":
-                        if tableValues[index+2] == "paused":
+                    elif _item == "RP_102_11am to 7pm":
+                        if tableValues[_index+2] == "paused":
                             self.campaigns[1][2] = True
                         else:
                             self.campaigns[1][2] = False
-                    elif item == "RP_103_7pmClose":
-                        if tableValues[index+2] == "paused":
+                    elif _item == "RP_103_7pmClose":
+                        if tableValues[_index+2] == "paused":
                             self.campaigns[2][2] = True
                         else:
                             self.campaigns[2][2] = False
@@ -405,17 +405,18 @@ class AutoBidAdjust:
             tableValues.append(td.text)
         self.sourceIDs.append(tableValues[::7])
         _i = 0
-        try:
-            for index in range(len(tableValues)):
-                if tableValues[index] == self.sourceIDs[0][_i]:
-                    if tableValues[index+3] is not None:
-                        float(self.clicksPerMin.append(tableValues[index+3]))
-                    else:
-                        self.clicksPerMin.append(0)
-                    _i += 1
-        except:pass
-        for index in range(len(self.sourceIDs[0])):
-            _customBidID = r"customBid_" + str(self.sourceIDs[0][index])
+        for _index, _item in enumerate(tableValues):
+            if _i <= len(self.sourceIDs[0]):
+                try:
+                    if int(_item) == int(self.sourceIDs[0][_i]):
+                        if tableValues[_index+3] is not None:
+                            self.clicksPerMin.append(float(tableValues[_index+3]))
+                        elif tableValues[_index+3] is None:
+                            self.clicksPerMin.append(0)
+                        _i += 1
+                except:pass
+        for _index in range(len(self.sourceIDs[0])):
+            _customBidID = r"customBid_" + str(self.sourceIDs[0][_index])
             try:
                 output = data.find("input", {"id": _customBidID})['value']
                 self.customBids.append(float(output))
