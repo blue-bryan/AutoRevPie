@@ -73,7 +73,8 @@ try:
     while _loop:
         try:
             _loop = ARP.AutomateRP.BrowserHandler().checkBrowser()
-            ARP.AutomateRP.BrowserHandler().admin_login(ARP.AutomateRP.BrowserHandler().getLoginInfo('-u'), ARP.AutomateRP.BrowserHandler().getLoginInfo('-p'))
+            ARP.AutomateRP.BrowserHandler().admin_login(
+                                            ARP.AutomateRP.BrowserHandler().getLoginInfo('-u'), ARP.AutomateRP.BrowserHandler().getLoginInfo('-p'))
         except KeyboardInterrupt:
             print("\n")
             ARP.AutomateRP.Config.sys.exit(1)
