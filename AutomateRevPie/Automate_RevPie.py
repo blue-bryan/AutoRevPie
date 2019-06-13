@@ -8,7 +8,9 @@
  traffic monitoring and the bidding process for RevPie.
 """
 
-import AutomateRevPie.ARP_WebDriver as Browser
+from AutomateRevPie import ARP_WebDriver as Browser
+from AutomateRevPie.ARP_WebDriver import BrowserHandler
+from AutomateRevPie.ARP_WebDriver import EH
 
 #                       - AutomateRevPie Module -
 ###############################################################################
@@ -50,15 +52,15 @@ class AutoRevPie:
             accordionFrame = Browser.browser.find_element_by_xpath("//a[.='RevPie Reporting']")
             actions = Browser.ActionChains(Browser.browser)
             actions.move_to_element(accordionFrame).click().perform()
-            Browser.ErrorHandler().waiting(2)
+            EH.Handler().waiting(2)
             Browser.browser.execute_script("$('#RevPieCampaigns').click()")
             wait.until(
                     Browser.expected_conditions.presence_of_element_located(
                             (Browser.By.ID, "revPieCampaignsDiv")))
         except Exception as err:
-            Browser.ErrorHandler().printToLog("\n\nBrowser Error: failed to open Bid Adjustments, closing...\n"
-                        , err, Browser.ErrorHandler().getLogFile())
-            Browser.ErrorHandler().checkBrowser()
+            EH.Handler().printToLog("\n\nBrowser Error: failed to open Bid Adjustments, closing...\n"
+                        , err, EH.Handler().getLogFile())
+            BrowserHandler().checkBrowser()
 
     def getCampaignStatus(self):
         ''' Will iterate the RevPie Campaigns table and get
@@ -66,20 +68,20 @@ class AutoRevPie:
             then returns the array.
             * paused==True/active==False
         '''
-        Browser.ErrorHandler().switchToTab(self.bidsPageTab)
+        BrowserHandler().switchToTab(self.bidsPageTab)
         try:
             Browser.WebDriverWait(Browser.browser, 15).until(
                     Browser.expected_conditions.presence_of_element_located(
                             (Browser.By.ID, "revPieCampaignsDiv")))
         except Exception as err:
-            Browser.ErrorHandler().printToLog("\n\nBrowser Error while getting campaign status, closing...\n"
-                        , err, Browser.ErrorHandler().getLogFile())
-            Browser.ErrorHandler().checkBrowser()
+            EH.Handler().printToLog("\n\nBrowser Error while getting campaign status, closing...\n"
+                        , err, EH.Handler().getLogFile())
+            BrowserHandler().checkBrowser()
             return(False)
         else:
             Browser.browser.execute_script("$('#RevPieCampaigns').click()")
             try:
-                Browser.ErrorHandler().waiting(1)
+                EH.Handler().waiting(1)
                 _loop = True
                 while _loop:
                     if (str(Browser.browser.find_element_by_id(
@@ -87,10 +89,10 @@ class AutoRevPie:
                                     "style")) == "display: none;"):
                         _loop = False
                     else:
-                        Browser.ErrorHandler().checkBrowser()
+                        BrowserHandler().checkBrowser()
             except Exception as err:
-                Browser.ErrorHandler().printToLog("\n\ngetCampaignStatus: error, cannot find 'revPieCampaignsDiv'\n"
-                        , err, Browser.ErrorHandler().getLogFile())
+                EH.Handler().printToLog("\n\ngetCampaignStatus: error, cannot find 'revPieCampaignsDiv'\n"
+                        , err, EH.Handler().getLogFile())
                 return(False)
             else:
                 # get the table
@@ -128,52 +130,52 @@ class AutoRevPie:
         self.isPaused = self.campaigns[self.currentCampaign][2]
         if self.totalCalls > self.adjustBids_CallLimit and not self.isPaused and self.adjustBids == 0:
             if not self.isPaused:
-                Browser.ErrorHandler().switchToTab(self.bidsPageTab)
-                Browser.ErrorHandler().waiting(1)
+                BrowserHandler().switchToTab(self.bidsPageTab)
+                EH.Handler().waiting(1)
                 Browser.browser.execute_script("revPieBidAdjustments("
                                         + campaignID + ", '" + campaignName + "')")
-                Browser.ErrorHandler().waiting(2)
+                EH.Handler().waiting(2)
                 Bids = BidAdjuster.copyBids()
-                Browser.ErrorHandler().waiting(1)
+                EH.Handler().waiting(1)
                 BidAdjuster.changeBids(*Bids, _option='-l')
-                Browser.ErrorHandler().waiting(1)
+                EH.Handler().waiting(1)
                 Browser.browser.execute_script("$.Dialog.close()")
-                Browser.ErrorHandler().printToLog('\n\nBids lowered...\n'
-                        , "", Browser.ErrorHandler().getLogFile())
-                self.startTime = Browser.Config.time.time()
+                EH.Handler().printToLog('\n\nBids lowered...\n'
+                        , "", EH.Handler().getLogFile())
+                self.startTime = EH.Config.time.time()
                 self.adjustBids = 1
                 self.campaigns = self.getCampaignStatus()
         elif self.totalCalls > self.maxCallLimit and not self.isPaused:
             self.campaigns = self.getCampaignStatus()
             if not self.isPaused:
-                Browser.ErrorHandler().switchToTab(self.bidsPageTab)
+                BrowserHandler().switchToTab(self.bidsPageTab)
                 Browser.browser.execute_script("changeRevPieCampaignStatus(" + campaignID + ", 1)")
-                Browser.ErrorHandler().printToLog('\n\nCampaign Paused...\n'
-                        , "", Browser.ErrorHandler().getLogFile())
+                EH.Handler().printToLog('\n\nCampaign Paused...\n'
+                        , "", EH.Handler().getLogFile())
                 self.campaigns = self.getCampaignStatus()
         elif self.totalCalls < 3 and self.isPaused:
             self.campaigns = self.getCampaignStatus()
             if self.isPaused:
-                Browser.ErrorHandler().switchToTab(self.bidsPageTab)
+                BrowserHandler().switchToTab(self.bidsPageTab)
                 Browser.browser.execute_script("changeRevPieCampaignStatus(" + campaignID + ", 0)")
-                Browser.ErrorHandler().printToLog('\n\nCampaign un-paused...\n'
-                        , "", Browser.ErrorHandler().getLogFile())
+                EH.Handler().printToLog('\n\nCampaign un-paused...\n'
+                        , "", EH.Handler().getLogFile())
                 self.campaigns = self.getCampaignStatus()
         elif self.totalCalls < 3 and not self.isPaused and self.adjustBids == 1 :
-            _timeDiff = Browser.Config.time.time() - self.startTime
+            _timeDiff = EH.Config.time.time() - self.startTime
             if _timeDiff > (5 * 60):
-                Browser.ErrorHandler().switchToTab(self.bidsPageTab)
+                BrowserHandler().switchToTab(self.bidsPageTab)
                 Browser.browser.execute_script("revPieBidAdjustments("
                                         + campaignID + ", '" + campaignName + "')")
-                Browser.ErrorHandler().waiting(1)
+                EH.Handler().waiting(1)
                 Bids = BidAdjuster.copyBids()
-                Browser.ErrorHandler().waiting(1)
+                EH.Handler().waiting(1)
                 BidAdjuster.changeBids(*Bids)
-                Browser.ErrorHandler().waiting(1)
+                EH.Handler().waiting(1)
                 Browser.browser.execute_script("$.Dialog.close()")
-                Browser.ErrorHandler().printToLog('\n\nBids raised...\n'
-                        , "", Browser.ErrorHandler().getLogFile())
-                self.startTime = Browser.Config.time.time()
+                EH.Handler().printToLog('\n\nBids raised...\n'
+                        , "", EH.Handler().getLogFile())
+                self.startTime = EH.Config.time.time()
                 self.adjustBids = 0
 
     def switchCampaigns(self, campaignID_1, campaignName_1, campaignID_2, campaignName_2):
@@ -185,33 +187,33 @@ class AutoRevPie:
                                         , AutoRevPie.campaigns[AutoRevPie.currentCampaign][0])
         '''
         BidAdjuster = AutoBidAdjust()
-        Browser.ErrorHandler().switchToTab(self.bidsPageTab)
+        BrowserHandler().switchToTab(self.bidsPageTab)
         Browser.browser.execute_script("changeRevPieCampaignStatus(" + campaignID_1 + ", 1)")
-        Browser.ErrorHandler().waiting(1)
+        EH.Handler().waiting(1)
         Browser.browser.execute_script("changeRevPieCampaignStatus(" + campaignID_2 + ", 0)")
-        Browser.ErrorHandler().waiting(2)
+        EH.Handler().waiting(2)
         Browser.browser.execute_script("revPieBidAdjustments("
                                 + campaignID_1 + ", '" + campaignName_1 + "')")
-        Browser.ErrorHandler().waiting(1)
+        EH.Handler().waiting(1)
         Browser.WebDriverWait(Browser.browser, 15).until(
                 Browser.expected_conditions.presence_of_element_located(
                         (Browser.By.ID,'bidAdjustmentsTable')))
-        Browser.ErrorHandler().waiting(1)
+        EH.Handler().waiting(1)
         Bids = BidAdjuster.copyBids()
-        Browser.ErrorHandler().waiting(1)
+        EH.Handler().waiting(1)
         Browser.browser.execute_script("$.Dialog.close()")
-        Browser.ErrorHandler().waiting(2)
+        EH.Handler().waiting(2)
         Browser.browser.execute_script("revPieBidAdjustments("
                                 + campaignID_2 + ", '" + campaignName_2 + "')")
-        Browser.ErrorHandler().waiting(2)
+        EH.Handler().waiting(2)
         BidAdjuster.changeBids(*Bids, _option='-p')
-        Browser.ErrorHandler().waiting(2)
+        EH.Handler().waiting(2)
         Browser.browser.execute_script("$.Dialog.close()")
 
     def getCalls(self):
         ''' Count calls in queue
         '''
-        Browser.ErrorHandler().switchToTab(self.wallboardTab)
+        BrowserHandler().switchToTab(self.wallboardTab)
         try: # switch to wall board for total calls
             Browser.WebDriverWait(Browser.browser, 15).until(
                     Browser.expected_conditions.presence_of_element_located(
@@ -225,10 +227,10 @@ class AutoRevPie:
                             + int(seniorLoan2.text))
             return(self.totalCalls)
         except Exception as err:
-            Browser.ErrorHandler().printToLog("\n\nBrowser error: wallboard\n"
-                        , err, Browser.ErrorHandler().getLogFile())
+            EH.Handler().printToLog("\n\nBrowser error: wallboard\n"
+                        , err, EH.Handler().getLogFile())
             self.totalCalls = 0
-            Browser.ErrorHandler().checkBrowser()
+            BrowserHandler().checkBrowser()
             return(self.totalCalls)
 
     def autoRevPie(self, repsAvail):
@@ -237,12 +239,12 @@ class AutoRevPie:
             Then automatically makes adjustments based on criteria.
             * Must be executed in a loop to run continuously
         '''
-        Browser.ErrorHandler().checkBrowser()
+        BrowserHandler().checkBrowser()
         # check if repsAvail == None, this will avoid NaN error for callLimit
         if self.getReps:
             if repsAvail is None or repsAvail == 0:
-                Browser.ErrorHandler().printToLog("\nError: failed to get rep count, using default callLimit : 8...\n\n"
-                        , "", Browser.ErrorHandler().getLogFile())
+                EH.Handler().printToLog("\nError: failed to get rep count, using default callLimit : 8...\n\n"
+                        , "", EH.Handler().getLogFile())
                 self.getReps = False
             else:
                 self.adjustBids_CallLimit = round((repsAvail * self.repsToCallsRatio), 0)
@@ -262,93 +264,93 @@ class AutoRevPie:
                   , '  Total Calls: ', self.totalCalls, ' '
                   , end="", flush = True)
         except Exception as err:
-            Browser.ErrorHandler().printToLog("\n\nautoPause: Error while printing output\n"
-                        , err, Browser.ErrorHandler().getLogFile())
-            Browser.Config.sys.exit(1)
+            EH.Handler().printToLog("\n\nautoPause: Error while printing output\n"
+                        , err, EH.Handler().getLogFile())
+            EH.Config.sys.exit(1)
 
         # 8am - 11am
-        if (Browser.Config.datetime.datetime.now().time() > Browser.Config.datetime.datetime.strptime("08:59", "%H:%M").time()
-        and Browser.Config.datetime.datetime.now().time() < Browser.Config.datetime.datetime.strptime("11:00", "%H:%M").time()
-        and Browser.Config.datetime.datetime.today().weekday() < 5):
+        if (EH.Config.datetime.datetime.now().time() > EH.Config.datetime.datetime.strptime("08:59", "%H:%M").time()
+        and EH.Config.datetime.datetime.now().time() < EH.Config.datetime.datetime.strptime("11:00", "%H:%M").time()
+        and EH.Config.datetime.datetime.today().weekday() < 5):
             self.currentCampaign = 0
             self.isPaused = self.campaigns[self.currentCampaign][2]
-            if (Browser.Config.datetime.datetime.now().time() > Browser.Config.datetime.datetime.strptime("08:59", "%H:%M").time()
-            and Browser.Config.datetime.datetime.now().time() < Browser.Config.datetime.datetime.strptime("09:01", "%H:%M").time()
-            and Browser.Config.datetime.datetime.today().weekday() < 5):
+            if (EH.Config.datetime.datetime.now().time() > EH.Config.datetime.datetime.strptime("08:59", "%H:%M").time()
+            and EH.Config.datetime.datetime.now().time() < EH.Config.datetime.datetime.strptime("09:01", "%H:%M").time()
+            and EH.Config.datetime.datetime.today().weekday() < 5):
                 if self.isPaused:
-                    Browser.ErrorHandler().switchToTab(self.bidsPageTab)
+                    BrowserHandler().switchToTab(self.bidsPageTab)
                     Browser.browser.execute_script("changeRevPieCampaignStatus(" + self.campaigns[self.currentCampaign][1] + ", 0)")
-                    Browser.ErrorHandler().printToLog('\n\n9am-11am Campaign started\n'
-                            , "", Browser.ErrorHandler().getLogFile())
+                    EH.Handler().printToLog('\n\n9am-11am Campaign started\n'
+                            , "", EH.Handler().getLogFile())
                     self.campaigns = self.getCampaignStatus()
                     for i in range(60 * 2):
                         if i < (60 * 2):
                             self.watchCalls(self.campaigns[self.currentCampaign][1]
                                             , self.campaigns[self.currentCampaign][0])
-                            Browser.ErrorHandler().waiting(1)
+                            EH.Handler().waiting(1)
             self.watchCalls(self.campaigns[self.currentCampaign][1]
                             , self.campaigns[self.currentCampaign][0])
         # 11am - 7pm
-        elif (Browser.Config.datetime.datetime.now().time() > Browser.Config.datetime.datetime.strptime("11:01", "%H:%M").time()
-        and Browser.Config.datetime.datetime.now().time() < Browser.Config.datetime.datetime.strptime("19:00", "%H:%M").time()
-        and Browser.Config.datetime.datetime.today().weekday() < 5):
+        elif (EH.Config.datetime.datetime.now().time() > EH.Config.datetime.datetime.strptime("11:01", "%H:%M").time()
+        and EH.Config.datetime.datetime.now().time() < EH.Config.datetime.datetime.strptime("19:00", "%H:%M").time()
+        and EH.Config.datetime.datetime.today().weekday() < 5):
             self.currentCampaign = 1
             self.isPaused = self.campaigns[self.currentCampaign][2]
-            if (Browser.Config.datetime.datetime.now().time() > Browser.Config.datetime.datetime.strptime("11:01", "%H:%M").time()
-            and Browser.Config.datetime.datetime.now().time() < Browser.Config.datetime.datetime.strptime("11:02", "%H:%M").time()
-            and Browser.Config.datetime.datetime.today().weekday() < 5):
+            if (EH.Config.datetime.datetime.now().time() > EH.Config.datetime.datetime.strptime("11:01", "%H:%M").time()
+            and EH.Config.datetime.datetime.now().time() < EH.Config.datetime.datetime.strptime("11:02", "%H:%M").time()
+            and EH.Config.datetime.datetime.today().weekday() < 5):
                 self.switchCampaigns( self.campaigns[self.currentCampaign-1][1]
                                     , self.campaigns[self.currentCampaign-1][0]
                                     , self.campaigns[self.currentCampaign][1]
                                     , self.campaigns[self.currentCampaign][0] )
-                Browser.ErrorHandler().printToLog('\n\nSwitched to 11am campaign...\n'
-                        , "", Browser.ErrorHandler().getLogFile())
+                EH.Handler().printToLog('\n\nSwitched to 11am campaign...\n'
+                        , "", EH.Handler().getLogFile())
                 # wait until 11:02
                 for i in range(60):
                     if i < (60):
                         self.watchCalls(self.campaigns[self.currentCampaign][1]
                                         , self.campaigns[self.currentCampaign][0])
-                        Browser.ErrorHandler().waiting(1)
+                        EH.Handler().waiting(1)
             self.watchCalls(self.campaigns[self.currentCampaign][1]
                             , self.campaigns[self.currentCampaign][0])
         # 7pm - close
-        elif (Browser.Config.datetime.datetime.now().time() > Browser.Config.datetime.datetime.strptime("19:01", "%H:%M").time()
-        and Browser.Config.datetime.datetime.now().time() < Browser.Config.datetime.datetime.strptime("21:00", "%H:%M").time()
-        and Browser.Config.datetime.datetime.today().weekday() < 5):
+        elif (EH.Config.datetime.datetime.now().time() > EH.Config.datetime.datetime.strptime("19:01", "%H:%M").time()
+        and EH.Config.datetime.datetime.now().time() < EH.Config.datetime.datetime.strptime("21:00", "%H:%M").time()
+        and EH.Config.datetime.datetime.today().weekday() < 5):
             self.currentCampaign = 2
             self.isPaused = self.campaigns[self.currentCampaign][2]
-            if (Browser.Config.datetime.datetime.now().time() > Browser.Config.datetime.datetime.strptime("19:01", "%H:%M").time()
-            and Browser.Config.datetime.datetime.now().time() < Browser.Config.datetime.datetime.strptime("19:02", "%H:%M").time()
-            and Browser.Config.datetime.datetime.today().weekday() < 5):
-                Browser.ErrorHandler().switchToTab(self.bidsPageTab)
+            if (EH.Config.datetime.datetime.now().time() > EH.Config.datetime.datetime.strptime("19:01", "%H:%M").time()
+            and EH.Config.datetime.datetime.now().time() < EH.Config.datetime.datetime.strptime("19:02", "%H:%M").time()
+            and EH.Config.datetime.datetime.today().weekday() < 5):
+                BrowserHandler().switchToTab(self.bidsPageTab)
                 self.switchCampaigns( self.campaigns[self.currentCampaign-1][1]
                                     , self.campaigns[self.currentCampaign-1][0]
                                     , self.campaigns[self.currentCampaign][1]
                                     , self.campaigns[self.currentCampaign][0] )
-                Browser.ErrorHandler().printToLog('\n\nSwitched to 7pm campaign...\n'
-                        , "", Browser.ErrorHandler().getLogFile())
+                EH.Handler().printToLog('\n\nSwitched to 7pm campaign...\n'
+                        , "", EH.Handler().getLogFile())
                 # wait until 19:02
                 for i in range(60):
                     if i < (60):
                         self.watchCalls(self.campaigns[self.currentCampaign][1]
                                         , self.campaigns[self.currentCampaign][0])
-                        Browser.ErrorHandler().waiting(1)
-            elif (Browser.Config.datetime.datetime.now().time() > Browser.Config.datetime.datetime.strptime("20:55", "%H:%M").time()
-            and Browser.Config.datetime.datetime.now().time() < Browser.Config.datetime.datetime.strptime("21:01", "%H:%M").time()
-            and Browser.Config.datetime.datetime.today().weekday() < 5):
+                        EH.Handler().waiting(1)
+            elif (EH.Config.datetime.datetime.now().time() > EH.Config.datetime.datetime.strptime("20:55", "%H:%M").time()
+            and EH.Config.datetime.datetime.now().time() < EH.Config.datetime.datetime.strptime("21:01", "%H:%M").time()
+            and EH.Config.datetime.datetime.today().weekday() < 5):
                 Browser.browser.execute_script("changeRevPieCampaignStatus(" + self.campaigns[self.currentCampaign][1] + ", 1)")
                 self.campaigns = self.getCampaignStatus()
-                Browser.ErrorHandler().printToLog('\n\n7pm-close Campaign Paused...\n'
-                        , "", Browser.ErrorHandler().getLogFile())
+                EH.Handler().printToLog('\n\n7pm-close Campaign Paused...\n'
+                        , "", EH.Handler().getLogFile())
                 # wait until next day
-                if Browser.Config.datetime.datetime.today().weekday() == 4:
+                if EH.Config.datetime.datetime.today().weekday() == 4:
                     for i in range(60 * 60 * 24 * 2.5):
                         if i < (60 * 60 * 24 * 2.5):
-                            Browser.ErrorHandler().waiting(1)
-                elif Browser.Config.datetime.datetime.today().weekday() < 5:
+                            EH.Handler().waiting(1)
+                elif EH.Config.datetime.datetime.today().weekday() < 5:
                     for i in range(60 * 60 * 12):
                         if i < (60 * 60 * 12):
-                            Browser.ErrorHandler().waiting(1)
+                            EH.Handler().waiting(1)
         else:
             self.currentCampaign = 3
             self.isPaused = self.campaigns[self.currentCampaign][2]
@@ -389,7 +391,7 @@ class AutoBidAdjust:
             * Returns a tuple of lists: [ self.sourceIDs[0], self.clicksPerMin, self.customBids) ]
         '''
         # wait for the table
-        Browser.ErrorHandler().waiting(1)
+        EH.Handler().waiting(1)
         Browser.WebDriverWait(Browser.browser, 15).until(
                 Browser.expected_conditions.presence_of_element_located(
                         (Browser.By.ID,'bidAdjustmentsTable')))
@@ -429,7 +431,7 @@ class AutoBidAdjust:
         '''
         __textBox.send_keys(Browser.Keys.CONTROL, 'a')
         __textBox.send_keys(str(__newBid))
-        Browser.ErrorHandler().waiting(1)
+        EH.Handler().waiting(1)
         Browser.browser.execute_script("makeCustomBidAdjustment('" + str(_sourceID) + "')")
 
     def changeBids(self, sourceIDs, clicksPerMin, customBids, _option = None, changeAmount = 0.04, minCPM = 0):
@@ -451,7 +453,7 @@ class AutoBidAdjust:
         '''
         if _option == '-p': # change date filter to All if pasting bids
             Browser.browser.execute_script("changeBidAdjustmentsDateFilter('all')")
-            Browser.ErrorHandler().waiting(2)
+            EH.Handler().waiting(2)
             _loop = True
             while _loop:
                 if (str(Browser.browser.find_element_by_id(
@@ -459,8 +461,8 @@ class AutoBidAdjust:
                                 "style")) == "display: none;"):
                     _loop = False
                 else:
-                    Browser.ErrorHandler().checkBrowser()
-            Browser.ErrorHandler().waiting(2)
+                    BrowserHandler().checkBrowser()
+            EH.Handler().waiting(2)
             Browser.WebDriverWait(Browser.browser, 15).until(
                     Browser.expected_conditions.presence_of_element_located(
                             (Browser.By.ID, 'bidAdjustmentsTable')))
@@ -486,89 +488,11 @@ class AutoBidAdjust:
             self.makeChange(_textBox, _newBid, sourceIDs[_index])
 
 # ******************************************************************
-
-class RepCount:
-    ''' Will open QueueOrder page,
-        parse table to get repCount,
-        and refresh page to get updated count
-    '''
-    def __init__ (self, _queueOrderTab):
-        self.queueOrderTab = _queueOrderTab
-        self.repCount = 0
-
-    def getRepsMain(self):
-        ''' Will load QueueOrder page in new tab,
-            then selects the Rollover queue.
-            * Returns the initial repCount as int
-        '''
-        try:
-            Browser.browser.execute_script("window.location = '/Maintenance/QueueOrder'")
-            Browser.ErrorHandler().waiting(1)
-            Browser.WebDriverWait(Browser.browser, 10).until(
-                    Browser.expected_conditions.presence_of_element_located(
-                            (Browser.By.XPATH, "//select[@name='queueNumber']/option[text()='Rollover']")))
-            Browser.browser.find_element_by_xpath(
-                    "//select[@name='queueNumber']/option[text()='Rollover']").click()
-            Browser.browser.find_element_by_name('QueueList').click()
-            Browser.ErrorHandler().waiting(1)
-            self.repCount = self.getRepsTable()
-            return(self.repCount)
-        except Exception as err:
-            Browser.ErrorHandler().printToLog("\nBrowser error, failed to get queue order\n"
-                    , err, Browser.ErrorHandler().getLogFile())
-            return(None)
-
-    def getRepsTable(self):
-        ''' Will parse the QueueList table,
-            and return repCount as int
-        '''
-        try: # get the table
-            Browser.WebDriverWait(Browser.browser, 15).until(
-                    Browser.expected_conditions.presence_of_element_located(
-                            (Browser.By.XPATH, "//table[@class='table striped bordered hovered']")))
-            root = Browser.lxml.html.fromstring(Browser.browser.page_source)
-            table =  root.xpath("//table[@class='table striped bordered hovered']")[0]
-            # iterate over all the rows   
-            for row in table.xpath(".//tr"):
-                # get the text from all the td's from each row
-                repTable = [td.text for td in row.xpath(".//td[text()][last()-2]")]
-            self.repCount = list(map(int, repTable))
-            return(int(self.repCount[0]))
-        except Exception as err:
-            Browser.ErrorHandler().printToLog("\n\nError: failed to get reps in queue\n"
-                    , err, Browser.ErrorHandler().getLogFile())
-            Browser.ErrorHandler().waiting(1)
-            return(None)
-
-    def getRepsUpdate(self):
-        ''' Method to update repCount value
-            after getRepsMain() has been called.
-            * Should be called only once every 10 minutes.
-        '''
-        try:
-            # switch to tab for queue order
-            Browser.ErrorHandler().switchToTab(self.queueOrderTab)
-            Browser.ErrorHandler().waiting(1)
-            Browser.browser.refresh()
-            Browser.ErrorHandler().waiting(1)
-            Browser.WebDriverWait(Browser.browser, 5).until(
-                    Browser.expected_conditions.alert_is_present())
-            alert = Browser.browser.switch_to.alert
-            alert.accept() # accept form resubmit
-        except Browser.TimeoutException as err:
-            Browser.ErrorHandler().printToLog("getRepsUpdate(): timeout exception"
-                    , err, Browser.ErrorHandler().getLogFile())
-        Browser.ErrorHandler().waiting(1)
-        self.repCount = self.getRepsTable()
-        return(self.repCount)
-
-# ******************************************************************
-
-# ******************************************************************
 # ---END OF CLASS DEFS---
 ####################################################################
 
-with open(Browser.Config.getfpath(__file__)+"/AutomateRevPie.info", 'r') as f:
+# print version info
+with open(EH.Config.getfpath(__file__)+"/AutomateRevPie.info", 'r') as f:
     print("\n####################################################################\n\n")
     print(" . . . ", f.readline())
 

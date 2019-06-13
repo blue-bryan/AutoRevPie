@@ -12,8 +12,9 @@ class RPStats:
         get performance statistics for sources.
         - metrics: sourceID, clicks, applications, cost, revenue
     '''
-    def __init__(self, _revpieStatsTab, _Browser):
+    def __init__(self, _revpieStatsTab, _Browser, _ErrorHandler):
         self.Browser = _Browser
+        self.ErrorHandler = _ErrorHandler
         self.revpieStatsTab = _revpieStatsTab
         self._currentCampaign = None
         self.tableHeaders = []
@@ -27,9 +28,9 @@ class RPStats:
         ''' Will load Campaign Performance Report for the current campaign
         '''
         try:
-            self.Browser.ErrorHandler().switchToTab(self.revpieStatsTab)
+            self.Browser.BrowserHandler().switchToTab(self.revpieStatsTab)
             self.Browser.browser.execute_script("window.location = '/Affiliates/RevPieCampaignPerformance'")
-            self.Browser.ErrorHandler().waiting(1)
+            self.ErrorHandler.waiting(1)
             self.Browser.WebDriverWait(self.Browser.browser, 15).until(
                     self.Browser.expected_conditions.presence_of_element_located(
                             (self.Browser.By.NAME, "CampaignId")))
@@ -46,10 +47,10 @@ class RPStats:
             self.Browser.browser.find_element_by_name('GetReport').click()
         except KeyboardInterrupt as err:
             print("\n", err)
-            self.Browser.Config.sys.exit(1)
+            self.Browser.EH.Config.sys.exit(1)
         except Exception as err:
-            self.Browser.ErrorHandler().printToLog("\ngetStatsPage() error: failed to get campaign performance stats\n"
-                    , err, self.Browser.ErrorHandler().getLogFile())
+            self.ErrorHandler.printToLog("\ngetStatsPage() error: failed to get campaign performance stats\n"
+                    , err, self.ErrorHandler.getLogFile())
 
     def getStatsTable(self):
         ''' Will read the Campaign Performance Report table 
@@ -60,10 +61,9 @@ class RPStats:
             self.Browser.WebDriverWait(self.Browser.browser, 15).until(
                     self.Browser.expected_conditions.presence_of_element_located(
                             (self.Browser.By.XPATH, "//table[@class='table striped bordered hovered']")))
-            self.Browser.ErrorHandler().waiting(1)
+            self.ErrorHandler.waiting(1)
             root = self.Browser.lxml.html.fromstring(self.Browser.browser.page_source)
             table = root.xpath("//table[@class='table striped bordered hovered']")[0]
-            # iterate over all the rows
             tableValues = []
             self.clicks = []
             self.appCount = []
@@ -92,11 +92,11 @@ class RPStats:
                     , self.revenue )
         except KeyboardInterrupt as err:
             print("\n", err)
-            self.Browser.Config.sys.exit(1)
+            self.Browser.EH.Config.sys.exit(1)
         except Exception as err:
-            self.Browser.ErrorHandler().printToLog("\n\ngetStatsTable(): error while loading table, check logs\n"
-                    , err, self.Browser.ErrorHandler().getLogFile())
-            self.Browser.ErrorHandler().checkBrowser()
+            self.ErrorHandler.printToLog("\n\ngetStatsTable(): error while loading table, check logs\n"
+                    , err, self.ErrorHandler.getLogFile())
+            self.ErrorHandler.checkBrowser()
 
     def getStatsUpdate(self, __currentCampaign, campaignName):
         ''' Will check if currentCampaign has changed,
@@ -109,28 +109,28 @@ class RPStats:
             tableValues = self.getStatsTable()
             return(tableValues)
         else:
-            self.Browser.ErrorHandler().switchToTab(self.revpieStatsTab)
+            self.Browser.BrowserHandler().switchToTab(self.revpieStatsTab)
             try:
                 self.Browser.browser.refresh()
-                self.Browser.ErrorHandler().waiting(1)
+                self.ErrorHandler.waiting(1)
                 self.Browser.WebDriverWait(self.Browser.browser, 7).until(
                         self.Browser.expected_conditions.alert_is_present())
                 alert = self.Browser.browser.switch_to.alert
                 alert.accept() # accept form resubmit
                 tableValues = self.getStatsTable()
             except self.Browser.TimeoutException as err:
-                self.Browser.ErrorHandler().printToLog("\n\ngetRepsUpdate(): timeout exception\n"
-                        , err, self.Browser.ErrorHandler().getLogFile())
+                self.ErrorHandler.printToLog("\n\ngetRepsUpdate(): timeout exception\n"
+                        , err, self.ErrorHandler.getLogFile())
             return(tableValues)
 
     def output_stats(self, _mode = None):
         ''' Will output campaign stats to file.
         '''
-        with open ((self.Browser.Config.config_path+"/config.ini"), 'r') as _f:
-                _fPath = self.Browser.Config.os.path.realpath(
-                            self.Browser.Config.os.path.join(
-                                _f.readline(), ('rp_stats(' + self.Browser.Config.time.strftime("%Y.%m.%d") + ').csv')))
-        _existingFile = self.Browser.Config.os.path.isfile(_fPath)
+        with open ((self.Browser.EH.Config.config_path+"/config.ini"), 'r') as _f:
+                _fPath = self.Browser.EH.Config.os.path.realpath(
+                            self.Browser.EH.Config.os.path.join(
+                                _f.readline(), ('rp_stats(' + self.Browser.EH.Config.time.strftime("%Y.%m.%d") + ').csv')))
+        _existingFile = self.Browser.EH.Config.os.path.isfile(_fPath)
         if not _existingFile: # write header to file if does not exist already
             _mode =  "-headers"
         with open(_fPath,'a') as _csvfile:
@@ -142,4 +142,4 @@ class RPStats:
                                     , self.clicks[_index]
                                     , self.appCount[_index]
                                     , self.cost[_index]
-                                    , self.revenue[_index]] )
+                                    , self.revenue[_index] ] )
