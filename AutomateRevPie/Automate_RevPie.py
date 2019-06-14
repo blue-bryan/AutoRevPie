@@ -27,6 +27,7 @@ class AutoRevPie:
         self.bidsPageTab = _bidsPageTab
         self.getReps = True
         self.isPaused = True
+        self.startTime = EH.Config.time.time()
         self.adjustBids_CallLimit  = 8 # default callLimit == 8
         self.repsToCallsRatio = 0.25 # ratio to use for callLimit...
                                      # x% of Reps in Queue = callLimit
@@ -120,7 +121,7 @@ class AutoRevPie:
                             self.campaigns[2][2] = False
             return(self.campaigns)
 
-    def watchCalls(self, campaignID, campaignName):
+    def watchCalls(self, campaignID, campaignName, ):
         ''' Will make adjustments to RevPie campaign status
             and bids based on criteria.
             * Used in AutoRevPie() so current campaign
@@ -129,7 +130,8 @@ class AutoRevPie:
         BidAdjuster = AutoBidAdjust()
         self.isPaused = self.campaigns[self.currentCampaign][2]
         if self.totalCalls > self.adjustBids_CallLimit and not self.isPaused and self.adjustBids == 0:
-            if not self.isPaused:
+            _timeDiff = EH.Config.time.time() - self.startTime
+            if _timeDiff > (60):
                 BrowserHandler().switchToTab(self.bidsPageTab)
                 EH.Handler().waiting(1)
                 Browser.browser.execute_script("revPieBidAdjustments("
@@ -263,7 +265,7 @@ class AutoRevPie:
             print('\r' + ' isPaused: ' + str(self.isPaused)
                   + '  Reps: ' + str(repsAvail)
                   + '  AdjustBids-CallLimit: ', self.adjustBids_CallLimit
-                  , '  AutoPause-CallLimit:  ', self.maxCallLimit
+                  , '  AutoPause-CallLimit: ', self.maxCallLimit
                   , '  Total Calls: ', self.totalCalls, ' '
                   , end="", flush = True)
         except Exception as err:
@@ -286,11 +288,9 @@ class AutoRevPie:
                     EH.Handler().printToLog('\n\n9am-11am Campaign started\n'
                             , "", EH.Handler().getLogFile())
                     self.campaigns = self.getCampaignStatus()
-                    for i in range(60 * 2):
-                        if i < (60 * 2):
-                            self.watchCalls(self.campaigns[self.currentCampaign][1]
-                                            , self.campaigns[self.currentCampaign][0])
-                            EH.Handler().waiting(1)
+                    self.watchCalls(self.campaigns[self.currentCampaign][1]
+                                    , self.campaigns[self.currentCampaign][0])
+                    EH.Handler().waiting(60)
             self.watchCalls(self.campaigns[self.currentCampaign][1]
                             , self.campaigns[self.currentCampaign][0])
         # 11am - 7pm
@@ -309,11 +309,9 @@ class AutoRevPie:
                 EH.Handler().printToLog('\n\nSwitched to 11am campaign...\n'
                         , "", EH.Handler().getLogFile())
                 # wait until 11:02
-                for i in range(60):
-                    if i < (60):
-                        self.watchCalls(self.campaigns[self.currentCampaign][1]
-                                        , self.campaigns[self.currentCampaign][0])
-                        EH.Handler().waiting(1)
+                self.watchCalls(self.campaigns[self.currentCampaign][1]
+                                , self.campaigns[self.currentCampaign][0])
+                EH.Handler().waiting(60)
             self.watchCalls(self.campaigns[self.currentCampaign][1]
                             , self.campaigns[self.currentCampaign][0])
         # 7pm - close
@@ -435,9 +433,6 @@ class AutoBidAdjust:
                 output = data.find("input", {"id": _customBidID})['value']
                 self.customBids.append(float(output))
             except:pass
-        print( self.sourceIDs[0]
-                , self.clicksPerMin
-                , self.customBids )
         return( self.sourceIDs[0]
                 , self.clicksPerMin
                 , self.customBids )

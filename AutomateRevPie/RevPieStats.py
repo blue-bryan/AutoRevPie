@@ -96,7 +96,7 @@ class RPStats:
         except Exception as err:
             self.ErrorHandler.printToLog("\n\ngetStatsTable(): error while loading table, check logs\n"
                     , err, self.ErrorHandler.getLogFile())
-            self.ErrorHandler.checkBrowser()
+            self.Browser.checkBrowser()
 
     def getStatsUpdate(self, __currentCampaign, campaignName):
         ''' Will check if currentCampaign has changed,
