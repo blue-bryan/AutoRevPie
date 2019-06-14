@@ -146,13 +146,16 @@ class AutoRevPie:
                 self.adjustBids = 1
                 self.campaigns = self.getCampaignStatus()
         elif self.totalCalls > self.maxCallLimit and not self.isPaused:
-            self.campaigns = self.getCampaignStatus()
-            if not self.isPaused:
-                BrowserHandler().switchToTab(self.bidsPageTab)
-                Browser.browser.execute_script("changeRevPieCampaignStatus(" + campaignID + ", 1)")
-                EH.Handler().printToLog('\n\nCampaign Paused...\n'
-                        , "", EH.Handler().getLogFile())
+            _timeDiff = EH.Config.time.time() - self.startTime
+            if _timeDiff > (60):
                 self.campaigns = self.getCampaignStatus()
+                if not self.isPaused:
+                    BrowserHandler().switchToTab(self.bidsPageTab)
+                    Browser.browser.execute_script("changeRevPieCampaignStatus(" + campaignID + ", 1)")
+                    EH.Handler().printToLog('\n\nCampaign Paused...\n'
+                            , "", EH.Handler().getLogFile())
+                    self.campaigns = self.getCampaignStatus()
+                    self.startTime = EH.Config.time.time()
         elif self.totalCalls < 3 and self.isPaused:
             self.campaigns = self.getCampaignStatus()
             if self.isPaused:
@@ -161,7 +164,7 @@ class AutoRevPie:
                 EH.Handler().printToLog('\n\nCampaign un-paused...\n'
                         , "", EH.Handler().getLogFile())
                 self.campaigns = self.getCampaignStatus()
-        elif self.totalCalls < 3 and not self.isPaused and self.adjustBids == 1 :
+        elif self.totalCalls < 3 and not self.isPaused and self.adjustBids == 1:
             _timeDiff = EH.Config.time.time() - self.startTime
             if _timeDiff > (5 * 60):
                 BrowserHandler().switchToTab(self.bidsPageTab)
@@ -381,6 +384,7 @@ class AutoBidAdjust:
     '''
     def __init__(self):
         self.sourceIDs = []
+        self.prevCPM = []
         self.clicksPerMin = []
         self.customBids = []
 
@@ -390,20 +394,25 @@ class AutoBidAdjust:
             opened and on active page.
             * Returns a tuple of lists: [ self.sourceIDs[0], self.clicksPerMin, self.customBids) ]
         '''
-        # wait for the table
+        # wait for the table...
         EH.Handler().waiting(1)
         Browser.WebDriverWait(Browser.browser, 15).until(
                 Browser.expected_conditions.presence_of_element_located(
                         (Browser.By.ID,'bidAdjustmentsTable')))
-        # get the table
+        # get the table...
         data = Browser.bs4.BeautifulSoup(Browser.browser.page_source, "lxml")
         root = Browser.lxml.html.fromstring(Browser.browser.page_source)
         table = root.xpath("//table[@class='table striped nbm bordered']")[0]
-        # iterate over all the rows
+        # iterate over all the rows...
         tableValues = []
+        self.sourceIDs = []
+        self.clicksPerMin = []
+        self.customBids = []
         for td in table.xpath('.//td'):
             tableValues.append(td.text)
+        # Source IDs...
         self.sourceIDs.append(tableValues[::7])
+        # Clicks/Min...
         _i = 0
         for _index, _item in enumerate(tableValues):
             if _i <= len(self.sourceIDs[0]):
@@ -415,12 +424,20 @@ class AutoBidAdjust:
                             self.clicksPerMin.append(0)
                         _i += 1
                 except:pass
+        if max(self.clicksPerMin) > 0:
+            self.prevCPM = self.clicksPerMin
+        if max(self.clicksPerMin) == 0:
+            self.clicksPerMin = self.prevCPM
+        # Custom Bids...
         for _index in range(len(self.sourceIDs[0])):
             _customBidID = r"customBid_" + str(self.sourceIDs[0][_index])
             try:
                 output = data.find("input", {"id": _customBidID})['value']
                 self.customBids.append(float(output))
             except:pass
+        print( self.sourceIDs[0]
+                , self.clicksPerMin
+                , self.customBids )
         return( self.sourceIDs[0]
                 , self.clicksPerMin
                 , self.customBids )
