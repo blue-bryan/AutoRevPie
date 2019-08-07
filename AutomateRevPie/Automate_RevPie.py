@@ -465,6 +465,7 @@ class AutoBidAdjust:
                 - Use to paste customBids.
         '''
         if _option == '-p': # change date filter to All if pasting bids
+            EH.Handler().waiting(1)
             Browser.browser.execute_script("changeBidAdjustmentsDateFilter('all')")
             EH.Handler().waiting(2)
             _loop = True
@@ -485,7 +486,7 @@ class AutoBidAdjust:
             try:
                 _textBox = Browser.browser.find_element_by_id(_elementID)
             except:pass # will pass if the sourceID is not available
-            finally:
+            else:
                 if _option is None: # default will raise bids
                     _newBid = customBids[_index] + changeAmount
                     self.makeChange(_textBox, _newBid, sourceIDs[_index])

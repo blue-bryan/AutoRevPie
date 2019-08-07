@@ -44,7 +44,7 @@ class BrowserHandler:
         '''
         if _option == '-u':
             try:
-                u = input("\n Input Admin Username: ")
+                u = input("\n Username: ")
                 return(u)
             except KeyboardInterrupt:
                 print("\n")
@@ -97,14 +97,14 @@ class BrowserHandler:
             browser.execute_script("window.location = '/skipseat1234'")
             EH.Handler().waiting(1)
 
-    def queueDaddy_login(self, username, password):
+    def queueDaddy_login(self, _u, _p):
         ''' *
         '''
         try:
-            wait = WebDriverWait(browser, 15)
+            wait = WebDriverWait(browser, 3)
             wait.until(
                     expected_conditions.presence_of_element_located(
-                            (By.XPATH, "//input[@name='userName']")))
+                            (By.NAME, "userName")))
         except Exception as err:
             EH.Handler().printToLog("\nBrowser Error: failed to login to QueueDaddy, closing..."
                     , err, EH.Handler().getLogFile())
@@ -112,9 +112,11 @@ class BrowserHandler:
             EH.Config.sys.exit(1)
         else:
             text_area = browser.find_element_by_xpath("//input[@name='userName']")
-            text_area.send_keys(username)
+            text_area.send_keys(Keys.CONTROL, 'a')
+            text_area.send_keys(_u)
             text_area = browser.find_element_by_xpath("//input[@name='passWord']")
-            text_area.send_keys(password)
+            text_area.send_keys(Keys.CONTROL, 'a')
+            text_area.send_keys(_p)
 
             browser.find_element_by_xpath("//button[@value='Submit']").click()
             EH.Handler().waiting(1)

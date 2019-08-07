@@ -37,13 +37,14 @@ try:
     # open file
     configParser = configparser.RawConfigParser()
     configParser.read_file(open(ARP.AutomateRP.Config.getfpath(__file__)
-                            + "/config.txt"))
+                            + "/config.ini"))
     # save to variables
     admin = r"{}".format(configParser.get('website-urls', 'admin'))
-    wallboard = r"{}".format(configParser.get('website-urls', 'wallboard'))
-    queueDetails = r"{}".format(configParser.get('website-urls', 'queueDetails'))
-    queue_uname = r"{}".format(configParser.get('login-info', 'username'))
-    queue_pass = r"{}".format(configParser.get('login-info', 'password'))
+    queueDaddy_url = r"{}".format(configParser.get('website-urls', 'queueDaddy'))
+    #queue_u = r"{}".format(configParser.get('login-info', 'QD_u'))
+    #queue_p = r"{}".format(configParser.get('login-info', 'QD_p'))
+    #admin_u = r"{}".format(configParser.get('login-info', 'Admin_u'))
+    #admin_p = r"{}".format(configParser.get('login-info', 'Admin_p'))
 except KeyboardInterrupt:
     print("\n")
     ARP.AutomateRP.Config.sys.exit(1)
@@ -60,15 +61,34 @@ CampaignStats = ARP.AutomateRP.RevPieStats.RPStats(3, ARP.AutomateRP.Browser, AR
 
 try:
     # load wallboard
-    ARP.AutomateRP.Browser.browser.get(wallboard)
+    ARP.AutomateRP.Browser.browser.get(queueDaddy_url)
     ARP.AutomateRP.EH.Handler().waiting(1)
-    ARP.AutomateRP.BrowserHandler().queueDaddy_login(queue_uname, queue_pass)
+    ARP.AutomateRP.BrowserHandler().switchToTab(AutoRP_obj.wallboardTab)
+    print("\n QueueDaddy Login . . . ")
+    _loop = True
+    while _loop:
+        try:
+            _loop = ARP.AutomateRP.BrowserHandler().checkBrowser()
+            ARP.AutomateRP.BrowserHandler().queueDaddy_login(
+                                            ARP.AutomateRP.BrowserHandler().getLoginInfo('-u'), ARP.AutomateRP.BrowserHandler().getLoginInfo('-p'))
+        except KeyboardInterrupt:
+            print("\n")
+            ARP.AutomateRP.Config.sys.exit(1)
+        except Exception as err:
+            ARP.AutomateRP.EH.Handler().printToLog("\nError: Incorrect Username/Password, try again...\n"
+                        , err, ARP.AutomateRP.EH.Handler().getLogFile())
+            print("\n . . . \n")
+        else:
+            _loop = False
+    ARP.AutomateRP.EH.Handler().waiting(1)
+    ARP.AutomateRP.Browser.browser.execute_script("window.location = '/queueWallboard/1'")
     ARP.AutomateRP.EH.Handler().waiting(1)
     # load admin page
     ARP.AutomateRP.Browser.browser.execute_script("window.open('" + admin + "')")
     # login to admin
     ARP.AutomateRP.EH.Handler().waiting(1)
     ARP.AutomateRP.BrowserHandler().switchToTab(AutoRP_obj.bidsPageTab)
+    print("\n Admin Login . . . \n ")
     _loop = True
     while _loop:
         try:
